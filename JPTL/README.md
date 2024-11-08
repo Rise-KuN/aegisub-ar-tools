@@ -1,3 +1,7 @@
+# JPTL
+
+- JPTL - Translate From `eng, jp` to `ar, eng`.
+
 ## Requirements
 
 - Require Python 3.9 or above.
