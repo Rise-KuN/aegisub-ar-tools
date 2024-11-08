@@ -1,10 +1,11 @@
 script_name = "المُشكل"
 script_description = "تشكيل الكلمات العربية"
 script_author = "Rise-KuN"
-script_version = "2.0"
+script_version = "2.1.0"
 
 local json = require 'json'
 local lfs = require 'lfs'
+local clipboard = require "clipboard"
 
 -- Directory for configuration
 function get_cr_config_path()
@@ -12,6 +13,22 @@ function get_cr_config_path()
     local config_dir = appdata .. "\\Aegisub\\CR"
     lfs.mkdir(config_dir)
     return config_dir .. "\\config.json"
+end
+
+-- Get word correction mapping file
+function get_word_correction_mapping_path()
+    local appdata = os.getenv("APPDATA")
+    local config_dir = appdata .. "\\Aegisub\\CR"
+    lfs.mkdir(config_dir)
+    return config_dir .. "\\word-correction-mapping.json"
+end
+
+-- Get commit hash
+function get_commit_hash_path()
+    local appdata = os.getenv("APPDATA")
+    local config_dir = appdata .. "\\Aegisub\\CR"
+    lfs.mkdir(config_dir)
+    return config_dir .. "\\commit_hash.json"
 end
 
 -- Temporary file for input data
@@ -53,7 +70,16 @@ end
 -- Save selected text for correction
 function save_correction_input(data)
     local input_path = get_correction_input_path()
-    local file = io.open(input_path, "w")
+
+    -- Check if the input file exists, and if so, remove it
+    local file = io.open(input_path, "r")
+    if file then
+        file:close()  -- Close the file if it's open
+        os.remove(input_path)  -- Remove the old input file
+    end
+
+    -- Now create and write the new input file
+    file = io.open(input_path, "w")
     file:write(json.encode(data))
     file:close()
 end
@@ -133,6 +159,15 @@ function correct_words(subtitles, selected_lines, active_line)
                 subtitles[line_index] = line
             end
             aegisub.set_undo_point(script_name)
+            -- Delete the output and input file after interaction
+            local output_path = get_correction_output_path()
+            os.remove(output_path)
+            local input_path = get_correction_input_path()
+            os.remove(input_path)
+            local word_correction_mapping_path = get_word_correction_mapping_path()
+            os.remove(word_correction_mapping_path)
+            local commit_hash_path = get_commit_hash_path()
+            os.remove(commit_hash_path)
         elseif button_pressed == "نسخ الكل" then
             -- Copy all corrections to clipboard
             local all_corrections = {}
@@ -140,6 +175,25 @@ function correct_words(subtitles, selected_lines, active_line)
                 table.insert(all_corrections, edited_corrections["correction_" .. i] or "")
             end
             clipboard.set(table.concat(all_corrections, "\n"))
+            -- Delete the output and input file after interaction
+            local output_path = get_correction_output_path()
+            os.remove(output_path)
+            local input_path = get_correction_input_path()
+            os.remove(input_path)
+            local word_correction_mapping_path = get_word_correction_mapping_path()
+            os.remove(word_correction_mapping_path)
+            local commit_hash_path = get_commit_hash_path()
+            os.remove(commit_hash_path)
+        else
+            -- Delete the output and input file after interaction
+            local output_path = get_correction_output_path()
+            os.remove(output_path)
+            local input_path = get_correction_input_path()
+            os.remove(input_path)
+            local word_correction_mapping_path = get_word_correction_mapping_path()
+            os.remove(word_correction_mapping_path)
+            local commit_hash_path = get_commit_hash_path()
+            os.remove(commit_hash_path)
         end
     else
         aegisub.debug.out("Error: Could not open cr_output.json. Check if the Python script ran correctly.")
