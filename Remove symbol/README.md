@@ -1,3 +1,3 @@
 # Remove symbol
 
-- Remove symbol - remove `!`" from the selected line.
+- Remove symbol - remove `!` from the selected line.
