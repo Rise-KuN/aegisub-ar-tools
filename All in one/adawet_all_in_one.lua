@@ -1,9 +1,12 @@
 script_name = "أدوات الحذف"
 script_description = "أدوات حذف نقاط آخر السطر وتقسم السطر"
 script_author = "Rise-KuN"
-script_version = "1.3.0"
+script_version = "1.3.1"
 
 include("unicode.lua")
+local json = require 'json'
+local lfs = require 'lfs'
+local clipboard = require "clipboard"
 
 lookup = {
  ['.'] = '‏.‏',
@@ -69,6 +72,22 @@ function get_cr_config_path()
     return config_dir .. "\\config.json"
 end
 
+-- Get word correction mapping file
+function get_word_correction_mapping_path()
+    local appdata = os.getenv("APPDATA")
+    local config_dir = appdata .. "\\Aegisub\\CR"
+    lfs.mkdir(config_dir)
+    return config_dir .. "\\word-correction-mapping.json"
+end
+
+-- Get commit hash
+function get_commit_hash_path()
+    local appdata = os.getenv("APPDATA")
+    local config_dir = appdata .. "\\Aegisub\\CR"
+    lfs.mkdir(config_dir)
+    return config_dir .. "\\commit_hash.json"
+end
+
 -- Temporary file for input data
 function get_correction_input_path()
     local appdata = os.getenv("APPDATA")
@@ -108,7 +127,16 @@ end
 -- Save selected text for correction
 function save_correction_input(data)
     local input_path = get_correction_input_path()
-    local file = io.open(input_path, "w")
+
+    -- Check if the input file exists, and if so, remove it
+    local file = io.open(input_path, "r")
+    if file then
+        file:close()  -- Close the file if it's open
+        os.remove(input_path)  -- Remove the old input file
+    end
+
+    -- Now create and write the new input file
+    file = io.open(input_path, "w")
     file:write(json.encode(data))
     file:close()
 end
@@ -188,6 +216,15 @@ function correct_words(subtitles, selected_lines, active_line)
                 subtitles[line_index] = line
             end
             aegisub.set_undo_point(script_name)
+            -- Delete the output and input file after interaction
+            local output_path = get_correction_output_path()
+            os.remove(output_path)
+            local input_path = get_correction_input_path()
+            os.remove(input_path)
+            local word_correction_mapping_path = get_word_correction_mapping_path()
+            os.remove(word_correction_mapping_path)
+            local commit_hash_path = get_commit_hash_path()
+            os.remove(commit_hash_path)
         elseif button_pressed == "نسخ الكل" then
             -- Copy all corrections to clipboard
             local all_corrections = {}
@@ -195,6 +232,25 @@ function correct_words(subtitles, selected_lines, active_line)
                 table.insert(all_corrections, edited_corrections["correction_" .. i] or "")
             end
             clipboard.set(table.concat(all_corrections, "\n"))
+            -- Delete the output and input file after interaction
+            local output_path = get_correction_output_path()
+            os.remove(output_path)
+            local input_path = get_correction_input_path()
+            os.remove(input_path)
+            local word_correction_mapping_path = get_word_correction_mapping_path()
+            os.remove(word_correction_mapping_path)
+            local commit_hash_path = get_commit_hash_path()
+            os.remove(commit_hash_path)
+        else
+            -- Delete the output and input file after interaction
+            local output_path = get_correction_output_path()
+            os.remove(output_path)
+            local input_path = get_correction_input_path()
+            os.remove(input_path)
+            local word_correction_mapping_path = get_word_correction_mapping_path()
+            os.remove(word_correction_mapping_path)
+            local commit_hash_path = get_commit_hash_path()
+            os.remove(commit_hash_path)
         end
     else
         aegisub.debug.out("Error: Could not open cr_output.json. Check if the Python script ran correctly.")
@@ -405,9 +461,6 @@ function calculate_progress(subtitles, selected_lines, active_line)
 end
 
 -- ترجمة من لغة إلى لغة أخرى
-local json = require 'json'
-local lfs = require 'lfs'
-
 function get_config_path()
     local appdata = os.getenv("APPDATA")
     local config_dir = appdata .. "\\Aegisub\\JPTL"
@@ -461,7 +514,6 @@ end
 
 function translate_with_external_script(subtitles, selected_lines, active_line)
     local config = load_config()
-    local clipboard = require "clipboard"
     local selected_text = {}
 
     for _, line_index in ipairs(selected_lines) do
@@ -545,12 +597,25 @@ function translate_with_external_script(subtitles, selected_lines, active_line)
                 subtitles[line_index] = line
             end
             aegisub.set_undo_point(script_name)
+            local translation_input_path = get_translation_input_path()
+            local translation_output_path = get_translation_output_path()
+            os.remove(translation_input_path)
+            os.remove(translation_output_path)
         elseif button_pressed == "نسخ الكل" then
             local all_translations = {}
             for i = 1, #translations do
                 table.insert(all_translations, edited_translations["translation_" .. i] or "")
             end
             clipboard.set(table.concat(all_translations, "\n"))
+            local translation_input_path = get_translation_input_path()
+            local translation_output_path = get_translation_output_path()
+            os.remove(translation_input_path)
+            os.remove(translation_output_path)
+        else
+            local translation_input_path = get_translation_input_path()
+            local translation_output_path = get_translation_output_path()
+            os.remove(translation_input_path)
+            os.remove(translation_output_path)
         end
     else
         aegisub.debug.out("Error: Could not open translation_output.json. Please check if the Python script ran correctly.")
