@@ -1,7 +1,7 @@
 script_name = "ترجمة متعددة"
 script_description = "ترجمة سطر مختار من لغة إلى لغة أخرى"
 script_author = "Rise-KuN"
-script_version = "2.1.0"
+script_version = "2.1.1"
 
 import os
 import json
@@ -18,8 +18,8 @@ commit_hash_path = os.path.join(appdatapath, "commit_hash.json")
 error_log_path = os.path.join(os.path.dirname(__file__), "error_log.txt")
 
 # URLs for the correction mapping JSON and commit history on GitHub
-correction_url = "https://raw.githubusercontent.com/Rise-KuN/al-mochakel/master/word-correction-mapping.json"
-commit_url = "https://api.github.com/repos/Rise-KuN/al-mochakel/commits?path=word-correction-mapping.json"
+correction_url = "https://raw.githubusercontent.com/Rise-KuN/aegisub-ar-tools/main/CR/Word%20Correction%20Mapping/word-correction-mapping.json"
+commit_url = "https://api.github.com/repos/Rise-KuN/aegisub-ar-tools/commits?path=CR/Word%20Correction%20Mapping/word-correction-mapping.json"
 
 # Ensure the app data path exists
 os.makedirs(appdatapath, exist_ok=True)
