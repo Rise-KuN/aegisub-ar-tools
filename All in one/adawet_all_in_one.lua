@@ -1,5 +1,5 @@
-script_name = "أدوات الحذف"
-script_description = "أدوات حذف نقاط آخر السطر وتقسم السطر"
+script_name = "أدوات"
+script_description = "أدوات متعددة الاستخدام"
 script_author = "Rise-KuN"
 script_version = "1.3.1"
 
@@ -21,8 +21,7 @@ lookup = {
  ['»'] = '‏«‏',
  ['-'] = '‏-‏',
  ['"'] = '‏"‏', 
-['،'] = '‏،‏',
-	 
+['،'] = '‏،‏', 
 }
 
 -- تصحيح النقاط آخر السطر
@@ -629,4 +628,4 @@ aegisub.register_macro("أدوات/حذف علامة التعجب", "حذف عل
 aegisub.register_macro("أدوات/حذف تقسيم السطر", "حذف تقسيم السطر", remove_punctuation_3)
 aegisub.register_macro("أدوات/تغيير موضع الكليب", "تغيير موضع الكليب", swap_clip_positions)
 aegisub.register_macro("أدوات/حساب نسبة التقدم", "حساب نسبة التقدم", calculate_progress)
-aegisub.register_macro("أدوات/ترجة متعددة", "ترجة متعددة", translate_with_external_script)
+aegisub.register_macro("أدوات/ترجمة متعددة", "ترجمة متعددة", translate_with_external_script)
