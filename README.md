@@ -19,13 +19,13 @@ Aegisub Has many tools as we know but not for Arab Fansubbers, So we created the
 
 - Require Python 3.9 or above.
 
-- You can install them by using requirements.txt file:
+You can install them by using `requirements.txt` file:
 
 Press `Win + R`, Then type `cmd`, And hit Enter
 ```
 pip install -r requirements.txt
 ```
-- Or Do It Manual via command prompt `cmd`:
+Or Do It Manual via command prompt `cmd`:
 
 Press `Win + R`, Then type `cmd`, And hit Enter
 ```
