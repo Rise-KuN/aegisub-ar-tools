@@ -7,7 +7,7 @@ Aegisub Has many tools as we know but not for Arab Fansubbers, So we created the
 - Calculate Progress - Based on the number of `current line, all lines`.
 - Fix Punctuation - fix the `. ! ؟` and make them at the end of the line In `RTL`.
 - Remove str - remove line break `\N` from the selected line.
-- Remove symbol - remove `!`" from the selected line.
+- Remove symbol - remove `!` from the selected line.
 - Remove Period - remove `.` at the end of the selected line.
 - Swap clip - Swap clip from `LTR` to `RLT` or the opposite, (you can do it manual anyways).
 - Adawet - All in one tools.
