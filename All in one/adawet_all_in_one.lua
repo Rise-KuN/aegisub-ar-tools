@@ -1,7 +1,7 @@
 script_name = "أدوات"
 script_description = "أدوات متعددة الاستخدام"
 script_author = "Rise-KuN"
-script_version = "1.3.1"
+script_version = "1.3.2"
 
 include("unicode.lua")
 local json = require 'json'
@@ -21,7 +21,7 @@ lookup = {
  ['»'] = '‏«‏',
  ['-'] = '‏-‏',
  ['"'] = '‏"‏', 
-['،'] = '‏،‏', 
+ ['،'] = '‏،‏', 
 }
 
 -- تصحيح النقاط آخر السطر
@@ -621,11 +621,49 @@ function translate_with_external_script(subtitles, selected_lines, active_line)
     end
 end
 
-aegisub.register_macro("أدوات/تصحيح النقاط آخر السطر", "تصحيح النقاط آخر السطر", fix_punctuation)
-aegisub.register_macro("أدوات/المُشكل", "المُشكل", correct_words)
+function edit_selected_text(subtitles, selected_lines)
+    local selected_text = {}
+
+    -- Collect selected text and combine into one string with line breaks
+    for _, line_index in ipairs(selected_lines) do
+        local line = subtitles[line_index]
+        table.insert(selected_text, line.text)
+    end
+    local combined_text = table.concat(selected_text, "\n")
+
+    -- Display the dialog with a single editable text box
+    local dialog_items = {
+        {class="label", label="التي على يمين الكيبورد لتحويل النص من اليمين لليسار ctrl + shift اضغط على", x=0, y=0, width=70, height=1},
+        {class="textbox", name="edit_text", text=combined_text, x=0, y=1, width=70, height=25}
+    }
+
+    local buttons = {"تطبيق", "نسخ الكل", "إلغاء"}
+    local button_pressed, edited_text = aegisub.dialog.display(dialog_items, buttons)
+
+    if button_pressed == "تطبيق" then
+        -- Apply edited text to the selected lines
+        local new_lines = {}
+        for line in edited_text["edit_text"]:gmatch("[^\n]+") do
+            table.insert(new_lines, line)
+        end
+        for i, line_index in ipairs(selected_lines) do
+            local line = subtitles[line_index]
+            line.text = new_lines[i] or ""
+            subtitles[line_index] = line
+        end
+        aegisub.set_undo_point(script_name)
+    elseif button_pressed == "نسخ الكل" then
+        -- Copy all edited text to clipboard
+        clipboard.set(edited_text["edit_text"])
+    end
+end
+
+aegisub.register_macro("أدوات/تصحيح نقاط آخر السطر", "تصحيح نقاط آخر السطر", fix_punctuation)
 aegisub.register_macro("أدوات/حذف نقاط آخر السطر", "حذف نقاط آخر السطر", remove_punctuation_1)
 aegisub.register_macro("أدوات/حذف علامة التعجب", "حذف علامة التعجب", remove_punctuation_2)
 aegisub.register_macro("أدوات/حذف تقسيم السطر", "حذف تقسيم السطر", remove_punctuation_3)
 aegisub.register_macro("أدوات/تغيير موضع الكليب", "تغيير موضع الكليب", swap_clip_positions)
 aegisub.register_macro("أدوات/حساب نسبة التقدم", "حساب نسبة التقدم", calculate_progress)
+aegisub.register_macro("أدوات/تعديل النصوص", "تعديل النصوص", edit_selected_text)
 aegisub.register_macro("أدوات/ترجمة متعددة", "ترجمة متعددة", translate_with_external_script)
+aegisub.register_macro("أدوات/المُشكل", "المُشكل", correct_words)
