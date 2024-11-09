@@ -621,6 +621,7 @@ function translate_with_external_script(subtitles, selected_lines, active_line)
     end
 end
 
+-- Text Editor
 function edit_selected_text(subtitles, selected_lines)
     local selected_text = {}
 
