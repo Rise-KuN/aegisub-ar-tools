@@ -1,13 +1,12 @@
 script_name = "ترجمة متعددة"
 script_description = "ترجمة سطر مختار من لغة إلى لغة أخرى"
 script_author = "Rise-KuN"
-script_version = "2.1.1"
+script_version = "2.1.2"
 
 import os
 import json
 import re
 import requests
-import hashlib
 
 # Paths
 appdatapath = os.getenv('APPDATA') + "\\Aegisub\\CR"
@@ -73,7 +72,10 @@ def apply_corrections(selected_text, corrections):
     corrected_texts = []
     for text in selected_text:
         for original, corrected in corrections.items():
-            text = re.sub(rf"\b{re.escape(original)}\b", corrected, text)
+            # Regex pattern to match the exact word only if it's not followed or preceded by additional diacritics
+            # It looks for the word boundaries (\b), ensuring no additional diacritics are added.
+            # The \b ensures we match word boundaries, and [^\u064B-\u0652] to ensures no diacritics are around the word
+            text = re.sub(rf"(?<![\u064B-\u0652])\b{re.escape(original)}\b(?![\u064B-\u0652])", corrected, text)
         corrected_texts.append(text)
     return corrected_texts
 
@@ -92,7 +94,7 @@ if __name__ == "__main__":
 
         # Check if there is a new version
         if latest_commit_hash != saved_commit_hash:
-            print("New version detected, updating local file and commit hash.")
+            #print("New version detected, updating local file and commit hash.")
             corrections = fetch_corrections()
             if corrections:
                 save_corrections_to_file(corrections)
@@ -100,7 +102,7 @@ if __name__ == "__main__":
             else:
                 raise ValueError("Failed to fetch corrections data.")
         else:
-            print("No changes in the correction mapping.")
+            #print("No changes in the correction mapping.")
             # Load saved corrections if no update is detected
             corrections = load_saved_corrections()
 
