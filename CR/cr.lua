@@ -1,7 +1,7 @@
 script_name = "المُشكل"
 script_description = "تشكيل الكلمات العربية"
 script_author = "Rise-KuN"
-script_version = "2.1.0"
+script_version = "2.1.1"
 
 local json = require 'json'
 local lfs = require 'lfs'
@@ -141,11 +141,37 @@ function correct_words(subtitles, selected_lines, active_line)
         local content = result_file:read("*all")
         local corrections_result = json.decode(content)
         result_file:close()
+        
+        -- Function to count words in a string
+        function count_words(str)
+            local _, count = str:gsub("%S+", "")  -- Count non-whitespace sequences
+            return count
+        end
 
-        -- Display the corrected text
-        local dialog_items = {}
+        -- Count changed words
         for i, corrected_text in ipairs(corrections_result) do
-            table.insert(dialog_items, {class="edit", name="correction_" .. i, text=corrected_text, x=0, y=i, width=75, height=1})
+            if corrected_text ~= selected_text[i] then  -- Only count changed lines
+                count = count + count_words(corrected_text)
+            end
+        end
+
+        -- Display the corrected text count
+        local dialog_items = {
+            {class="label", label="عدد الكلمات التي تم تعديلها", x=1, y=0, width=2, height=1},
+            {class="edit", name="changed_word_count", text=count, x=0, y=0, width=1, height=1, readonly=true},
+        }
+        
+        -- Display the corrected text
+        for i, corrected_text in ipairs(corrections_result) do
+            -- Check if the corrected text is different from the original
+            local label = ""
+            if corrected_text ~= selected_text[i] then
+                label = "تم تعديلها"  -- Mark the line as corrected
+            end
+
+            -- Add the corrected text and the label to the dialog items
+            table.insert(dialog_items, {class="edit", name="correction_" .. i, text=corrected_text, x=0, y=i+1, width=70, height=1})
+            table.insert(dialog_items, {class="label", label=label, x=70, y=i+1, width=1, height=1})
         end
 
         local buttons = {"تطبيق", "نسخ الكل", "إلغاء"}
