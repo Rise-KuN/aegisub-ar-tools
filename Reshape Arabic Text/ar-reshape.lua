@@ -1,9 +1,9 @@
-script_name = "عكس اتجاه الكلمات العربية"
+script_name = "تغيير شكل الكلمات العربية"
 script_description = "Reshape arabic text"
 script_author = "Rise-KuN"
 script_version = "1.0.0"
 
--- عكس اتجاه الكلمات العربية
+-- تغيير شكل الكلمات العربية
 local json = require 'json'
 local lfs = require 'lfs'
 local clipboard = require "clipboard"
