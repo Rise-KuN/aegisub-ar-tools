@@ -1,9 +1,10 @@
 script_name = "تغيير شكل الكلمات العربية"
 script_description = "Reshape arabic text"
 script_author = "Rise-KuN"
-script_version = "1.0.0"
+script_version = "1.0.1"
 
 -- تغيير شكل الكلمات العربية
+
 local json = require 'json'
 local lfs = require 'lfs'
 local clipboard = require "clipboard"
@@ -74,6 +75,14 @@ end
 function select_ar_reshape_file_path()
     local file_path = aegisub.dialog.open("اختر ملف", "", "", "*.py", false, true)
     return file_path
+end
+
+-- Clean Temp Files
+local function cleanup_reshape_temp_files()
+    local output_path = get_ar_reshape_output_path()
+    local input_path = get_ar_reshape_input_path()
+    os.remove(output_path)
+    os.remove(input_path)
 end
 
 -- Add ar_reshape using the Python script
@@ -152,10 +161,7 @@ function add_ar_reshape_to_words(subtitles, selected_lines, active_line)
             end
             aegisub.set_undo_point(script_name)
             -- Clean up temporary files
-            local output_path = get_ar_reshape_output_path()
-            os.remove(output_path)
-            local input_path = get_ar_reshape_input_path()
-            os.remove(input_path)
+            cleanup_reshape_temp_files()
         elseif button_pressed == "نسخ الكل" then
             -- Copy all text result to clipboard
             local all_corrections = {}
@@ -164,22 +170,13 @@ function add_ar_reshape_to_words(subtitles, selected_lines, active_line)
             end
             clipboard.set(table.concat(all_corrections, "\n"))
             -- Clean up temporary files
-            local output_path = get_ar_reshape_output_path()
-            os.remove(output_path)
-            local input_path = get_ar_reshape_input_path()
-            os.remove(input_path)
+            cleanup_reshape_temp_files()
 		elseif button_pressed == "إلغاء" then
             -- Clean up temporary files
-            local output_path = get_ar_reshape_output_path()
-            os.remove(output_path)
-            local input_path = get_ar_reshape_input_path()
-            os.remove(input_path)
+            cleanup_reshape_temp_files()
         else
             -- Clean up temporary files
-            local output_path = get_ar_reshape_output_path()
-            os.remove(output_path)
-            local input_path = get_ar_reshape_input_path()
-            os.remove(input_path)
+            cleanup_reshape_temp_files()
         end
     else
         aegisub.debug.out("Error: Could not open ar_reshape_output.json. Check if the Python script ran correctly.\n")
