@@ -1,7 +1,7 @@
 script_name = "المُشكل"
 script_description = "تشكيل الكلمات العربية"
 script_author = "Rise-KuN"
-script_version = "2.1.4"
+script_version = "2.1.5"
 
 -- أداة المُشكل
 
@@ -96,6 +96,18 @@ end
 function count_words(str)
     local _, count = str:gsub("%S+", "")  -- Count non-whitespace sequences
     return count
+end
+
+-- Clean Temp Files
+local function cleanup_cr_temp_files()
+    local output_path = get_correction_input_path()
+    os.remove(output_path)
+    local input_path = get_correction_input_path()
+    os.remove(input_path)
+    local word_correction_mapping_path = get_word_correction_mapping_path()
+    os.remove(word_correction_mapping_path)
+    local commit_hash_path = get_commit_hash_path()
+    os.remove(commit_hash_path)
 end
 
 -- Correct words using the Python script
@@ -219,13 +231,7 @@ function correct_words(subtitles, selected_lines, active_line)
 			end
 			aegisub.set_undo_point(script_name)
 			-- Clean up temporary files
-			os.remove(output_path)
-			local input_path = get_correction_input_path()
-			os.remove(input_path)
-			local word_correction_mapping_path = get_word_correction_mapping_path()
-			os.remove(word_correction_mapping_path)
-			local commit_hash_path = get_commit_hash_path()
-			os.remove(commit_hash_path)
+            cleanup_cr_temp_files()
         elseif button_pressed == "نسخ الكل" then
             -- Copy all corrections to clipboard
             local all_corrections = {}
@@ -234,32 +240,13 @@ function correct_words(subtitles, selected_lines, active_line)
             end
             clipboard.set(table.concat(all_corrections, "\n"))
             -- Clean up temporary files
-            os.remove(output_path)
-            local input_path = get_correction_input_path()
-            os.remove(input_path)
-            local word_correction_mapping_path = get_word_correction_mapping_path()
-            os.remove(word_correction_mapping_path)
-            local commit_hash_path = get_commit_hash_path()
-            os.remove(commit_hash_path)
+            cleanup_cr_temp_files()
         elseif button_pressed == "إلغاء" then
             -- Clean up temporary files
-            os.remove(output_path)
-            local input_path = get_correction_input_path()
-            os.remove(input_path)
-            local word_correction_mapping_path = get_word_correction_mapping_path()
-            os.remove(word_correction_mapping_path)
-            local commit_hash_path = get_commit_hash_path()
-            os.remove(commit_hash_path) 
+            cleanup_cr_temp_files()
         else
             -- Clean up temporary files
-            local output_path = get_correction_output_path()
-            os.remove(output_path)
-            local input_path = get_correction_input_path()
-            os.remove(input_path)
-            local word_correction_mapping_path = get_word_correction_mapping_path()
-            os.remove(word_correction_mapping_path)
-            local commit_hash_path = get_commit_hash_path()
-            os.remove(commit_hash_path)
+            cleanup_cr_temp_files()
         end
     end
 end
