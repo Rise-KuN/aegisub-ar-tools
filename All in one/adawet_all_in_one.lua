@@ -1,7 +1,7 @@
 script_name = "أدوات"
 script_description = "أدوات متعددة الاستخدام"
 script_author = "Rise-KuN"
-script_version = "1.3.8"
+script_version = "1.3.9"
 
 include("unicode.lua")
 local json = require 'json'
@@ -152,6 +152,18 @@ function count_words(str)
     return count
 end
 
+-- Clean Temp Files
+local function cleanup_cr_temp_files()
+    local output_path = get_correction_input_path()
+    os.remove(output_path)
+    local input_path = get_correction_input_path()
+    os.remove(input_path)
+    local word_correction_mapping_path = get_word_correction_mapping_path()
+    os.remove(word_correction_mapping_path)
+    local commit_hash_path = get_commit_hash_path()
+    os.remove(commit_hash_path)
+end
+
 -- Correct words using the Python script
 function correct_words(subtitles, selected_lines, active_line)
     local count = 0 -- Counter For Changed Words
@@ -273,13 +285,7 @@ function correct_words(subtitles, selected_lines, active_line)
 			end
 			aegisub.set_undo_point(script_name)
 			-- Clean up temporary files
-			os.remove(output_path)
-			local input_path = get_correction_input_path()
-			os.remove(input_path)
-			local word_correction_mapping_path = get_word_correction_mapping_path()
-			os.remove(word_correction_mapping_path)
-			local commit_hash_path = get_commit_hash_path()
-			os.remove(commit_hash_path)
+            cleanup_cr_temp_files()
         elseif button_pressed == "نسخ الكل" then
             -- Copy all corrections to clipboard
             local all_corrections = {}
@@ -288,32 +294,13 @@ function correct_words(subtitles, selected_lines, active_line)
             end
             clipboard.set(table.concat(all_corrections, "\n"))
             -- Clean up temporary files
-            os.remove(output_path)
-            local input_path = get_correction_input_path()
-            os.remove(input_path)
-            local word_correction_mapping_path = get_word_correction_mapping_path()
-            os.remove(word_correction_mapping_path)
-            local commit_hash_path = get_commit_hash_path()
-            os.remove(commit_hash_path)
+            cleanup_cr_temp_files()
         elseif button_pressed == "إلغاء" then
             -- Clean up temporary files
-            os.remove(output_path)
-            local input_path = get_correction_input_path()
-            os.remove(input_path)
-            local word_correction_mapping_path = get_word_correction_mapping_path()
-            os.remove(word_correction_mapping_path)
-            local commit_hash_path = get_commit_hash_path()
-            os.remove(commit_hash_path) 
+            cleanup_cr_temp_files()
         else
             -- Clean up temporary files
-            local output_path = get_correction_output_path()
-            os.remove(output_path)
-            local input_path = get_correction_input_path()
-            os.remove(input_path)
-            local word_correction_mapping_path = get_word_correction_mapping_path()
-            os.remove(word_correction_mapping_path)
-            local commit_hash_path = get_commit_hash_path()
-            os.remove(commit_hash_path)
+            cleanup_cr_temp_files()
         end
     end
 end
@@ -650,6 +637,14 @@ function select_file_path()
     return file_path
 end
 
+-- Clean Temp Files
+local function cleanup_jptl_temp_files()
+    local translation_input_path = get_translation_input_path()
+    local translation_output_path = get_translation_output_path()
+    os.remove(translation_input_path)
+    os.remove(translation_output_path)
+end
+
 function translate_with_external_script(subtitles, selected_lines, active_line)
     local config = load_config()
     local selected_text = {}
@@ -747,10 +742,7 @@ function translate_with_external_script(subtitles, selected_lines, active_line)
             end
             aegisub.set_undo_point(script_name)
             -- Clean up temporary files
-            local translation_input_path = get_translation_input_path()
-            local translation_output_path = get_translation_output_path()
-            os.remove(translation_input_path)
-            os.remove(translation_output_path)
+            cleanup_jptl_temp_files()
         elseif button_pressed == "نسخ الكل" then
             local all_translations = {}
             for i = 1, #translations do
@@ -758,22 +750,13 @@ function translate_with_external_script(subtitles, selected_lines, active_line)
             end
             clipboard.set(table.concat(all_translations, "\n"))
             -- Clean up temporary files
-            local translation_input_path = get_translation_input_path()
-            local translation_output_path = get_translation_output_path()
-            os.remove(translation_input_path)
-            os.remove(translation_output_path)
+            cleanup_jptl_temp_files()
         elseif button_pressed == "إلغاء" then
             -- Clean up temporary files
-            local translation_input_path = get_translation_input_path()
-            local translation_output_path = get_translation_output_path()
-            os.remove(translation_input_path)
-            os.remove(translation_output_path)
+            cleanup_jptl_temp_files()
         else
             -- Clean up temporary files
-            local translation_input_path = get_translation_input_path()
-            local translation_output_path = get_translation_output_path()
-            os.remove(translation_input_path)
-            os.remove(translation_output_path)
+            cleanup_jptl_temp_files()
         end
     else
         aegisub.debug.out("Error: Could not open translation_output.json. Please check if the Python script ran correctly.")
@@ -819,10 +802,6 @@ function edit_selected_text(subtitles, selected_lines)
 end
 
 -- تغيير شكل الكلمات العربية
-local json = require 'json'
-local lfs = require 'lfs'
-local clipboard = require "clipboard"
-
 -- Directory for configuration
 function get_ar_reshape_config_path()
     local appdata = os.getenv("APPDATA")
@@ -891,6 +870,14 @@ function select_ar_reshape_file_path()
     return file_path
 end
 
+-- Clean Temp Files
+local function cleanup_reshape_temp_files()
+    local output_path = get_ar_reshape_output_path()
+    local input_path = get_ar_reshape_input_path()
+    os.remove(output_path)
+    os.remove(input_path)
+end
+
 -- Add ar_reshape using the Python script
 function add_ar_reshape_to_words(subtitles, selected_lines, active_line)
     local selected_text = {}
@@ -931,7 +918,7 @@ function add_ar_reshape_to_words(subtitles, selected_lines, active_line)
             return
         end
         -- Proceed with the next action if the config file exists
-        aegisub.debug.out("Configuration file found, proceeding.\n")
+        -- aegisub.debug.out("Configuration file found, proceeding.\n")
     else
         return
     end
@@ -967,10 +954,7 @@ function add_ar_reshape_to_words(subtitles, selected_lines, active_line)
             end
             aegisub.set_undo_point(script_name)
             -- Clean up temporary files
-            local output_path = get_ar_reshape_output_path()
-            os.remove(output_path)
-            local input_path = get_ar_reshape_input_path()
-            os.remove(input_path)
+            cleanup_temp_files()
         elseif button_pressed == "نسخ الكل" then
             -- Copy all text result to clipboard
             local all_corrections = {}
@@ -979,22 +963,13 @@ function add_ar_reshape_to_words(subtitles, selected_lines, active_line)
             end
             clipboard.set(table.concat(all_corrections, "\n"))
             -- Clean up temporary files
-            local output_path = get_ar_reshape_output_path()
-            os.remove(output_path)
-            local input_path = get_ar_reshape_input_path()
-            os.remove(input_path)
+            cleanup_reshape_temp_files()
 		elseif button_pressed == "إلغاء" then
             -- Clean up temporary files
-            local output_path = get_ar_reshape_output_path()
-            os.remove(output_path)
-            local input_path = get_ar_reshape_input_path()
-            os.remove(input_path)
+            cleanup_reshape_temp_files()
         else
             -- Clean up temporary files
-            local output_path = get_ar_reshape_output_path()
-            os.remove(output_path)
-            local input_path = get_ar_reshape_input_path()
-            os.remove(input_path)
+            cleanup_reshape_temp_files()
         end
     else
         aegisub.debug.out("Error: Could not open ar_reshape_output.json. Check if the Python script ran correctly.\n")
