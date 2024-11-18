@@ -8,8 +8,8 @@
 - Remove symbol - Remove `!` from the selected line.
 - Remove Period - Remove `.` at the end of the selected line.
 - Text Editor - Edit the selected lines, also support `RLT` if you hit (right ctrl + right shift).
-- Swap clip - Swap clip from `LTR` to `RLT` or the opposite, (you can do it manual anyways).
 - Reshape AR Text - Reshape the text to make it support gardient and kareoke stuff.
+- Adjust Clip Positions - Change the positions of the `clip` or `iclip` from `LTR` to `RLT` or the opposite.
 
 > [!NOTE]
 > Some tools `CR`, `JPTL`, `Reshape AR Text`, Require Python 3.9 or above.
