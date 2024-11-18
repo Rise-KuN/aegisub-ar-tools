@@ -1,7 +1,7 @@
 script_name = "أدوات"
 script_description = "أدوات متعددة الاستخدام"
 script_author = "Rise-KuN"
-script_version = "1.3.4"
+script_version = "1.3.5"
 
 include("unicode.lua")
 local json = require 'json'
@@ -180,6 +180,34 @@ function correct_words(subtitles, selected_lines, active_line)
         selected_text = selected_text
     }
     save_correction_input(translation_data)
+    
+    -- Open dialog to select Python file if not set
+    local cr_first_dialog = {
+        {class="label", label="", x=1, y=0, width=1, height=1},
+    }
+    local button, cr_result = aegisub.dialog.display(cr_first_dialog, {"التالي", "إلغاء", "مسار الأداة"})
+
+    -- If "مسار الأداة" is clicked, let the user select the Python file
+    if button == "مسار الأداة" then
+        config.file_path = select_cr_file_path()
+        if config.file_path then
+            save_cr_config(config)
+            aegisub.debug.out("Python script path set to: " .. config.file_path)
+        else
+            aegisub.debug.out("No Python file selected.")
+            return
+        end
+    elseif button == "التالي" then
+        -- Check if the config file exists
+        if not config.file_path or not io.open(config.file_path, "r") then
+            aegisub.debug.out("Configuration file does not exist or the path is invalid.")
+            return
+        end
+        -- Proceed with the next action if the config file exists
+        aegisub.debug.out("Configuration file found, proceeding.")
+    else
+        return
+    end
 
     -- Execute the Python script to perform corrections
     if config.file_path then
@@ -267,6 +295,15 @@ function correct_words(subtitles, selected_lines, active_line)
             os.remove(word_correction_mapping_path)
             local commit_hash_path = get_commit_hash_path()
             os.remove(commit_hash_path)
+        elseif button_pressed == "إلغاء" then
+            -- Clean up temporary files
+            os.remove(output_path)
+            local input_path = get_correction_input_path()
+            os.remove(input_path)
+            local word_correction_mapping_path = get_word_correction_mapping_path()
+            os.remove(word_correction_mapping_path)
+            local commit_hash_path = get_commit_hash_path()
+            os.remove(commit_hash_path) 
         else
             -- Clean up temporary files
             local output_path = get_correction_output_path()
@@ -485,6 +522,7 @@ function calculate_progress(subtitles, selected_lines, active_line)
 end
 
 -- ترجمة من لغة إلى لغة أخرى
+-- Directory for configuration
 function get_config_path()
     local appdata = os.getenv("APPDATA")
     local config_dir = appdata .. "\\Aegisub\\JPTL"
@@ -492,6 +530,7 @@ function get_config_path()
     return config_dir .. "\\config.json"
 end
 
+-- Input file for translation
 function get_translation_input_path()
     local appdata = os.getenv("APPDATA")
     local config_dir = appdata .. "\\Aegisub\\JPTL"
@@ -499,12 +538,14 @@ function get_translation_input_path()
     return config_dir .. "\\translation_input.json"
 end
 
+-- Output file for translation
 function get_translation_output_path()
     local appdata = os.getenv("APPDATA")
     local config_dir = appdata .. "\\Aegisub\\JPTL"
     return config_dir .. "\\translation_output.json"
 end
 
+-- Load saved config
 function load_config()
     local config_path = get_config_path()
     local file = io.open(config_path, "r")
@@ -517,6 +558,7 @@ function load_config()
     end
 end
 
+-- Save config file path
 function save_config(config)
     local config_path = get_config_path()
     local file = io.open(config_path, "w")
@@ -524,6 +566,7 @@ function save_config(config)
     file:close()
 end
 
+-- Save selected text for translation
 function save_translation_input(data)
     local input_path = get_translation_input_path()
     local file = io.open(input_path, "w")
@@ -531,6 +574,7 @@ function save_translation_input(data)
     file:close()
 end
 
+-- Select file for Python script
 function select_file_path()
     local file_path = aegisub.dialog.open("اختر ملف", "", "", "*.py", false, true)
     return file_path
@@ -566,7 +610,15 @@ function translate_with_external_script(subtitles, selected_lines, active_line)
             aegisub.debug.out("No file selected. Please select a Python file.")
         end
         return
-    elseif button ~= "التالي" then
+    elseif button == "التالي" then
+        -- Check if the config file exists
+        if not config.file_path or not io.open(config.file_path, "r") then
+            aegisub.debug.out("Configuration file does not exist or the path is invalid.")
+            return
+        end
+        -- Proceed with the next action if the config file exists
+        aegisub.debug.out("Configuration file found, proceeding.")
+    else
         return
     end
 
@@ -592,6 +644,7 @@ function translate_with_external_script(subtitles, selected_lines, active_line)
     }
     save_translation_input(translation_data)
 
+     -- Execute the Python script
     if config.file_path then
         os.execute('python "' .. config.file_path .. '"')
     else
@@ -599,6 +652,7 @@ function translate_with_external_script(subtitles, selected_lines, active_line)
         return
     end
 
+    -- Read the output from the Python script
     local output_path = get_translation_output_path()
     local result_file = io.open(output_path, "r")
     if result_file then
@@ -615,12 +669,14 @@ function translate_with_external_script(subtitles, selected_lines, active_line)
         local button_pressed, edited_translations = aegisub.dialog.display(dialog_items, buttons)
 
         if button_pressed == "تطبيق" then
+            -- Apply the changes
             for i, line_index in ipairs(selected_lines) do
                 local line = subtitles[line_index]
                 line.text = edited_translations["translation_" .. i] or ""
                 subtitles[line_index] = line
             end
             aegisub.set_undo_point(script_name)
+            -- Clean up temporary files
             local translation_input_path = get_translation_input_path()
             local translation_output_path = get_translation_output_path()
             os.remove(translation_input_path)
@@ -631,11 +687,19 @@ function translate_with_external_script(subtitles, selected_lines, active_line)
                 table.insert(all_translations, edited_translations["translation_" .. i] or "")
             end
             clipboard.set(table.concat(all_translations, "\n"))
+            -- Clean up temporary files
+            local translation_input_path = get_translation_input_path()
+            local translation_output_path = get_translation_output_path()
+            os.remove(translation_input_path)
+            os.remove(translation_output_path)
+        elseif button_pressed == "إلغاء" then
+            -- Clean up temporary files
             local translation_input_path = get_translation_input_path()
             local translation_output_path = get_translation_output_path()
             os.remove(translation_input_path)
             os.remove(translation_output_path)
         else
+            -- Clean up temporary files
             local translation_input_path = get_translation_input_path()
             local translation_output_path = get_translation_output_path()
             os.remove(translation_input_path)
@@ -646,6 +710,7 @@ function translate_with_external_script(subtitles, selected_lines, active_line)
     end
 end
 
+-- تعديل النصوص
 function edit_selected_text(subtitles, selected_lines)
     local selected_text = {}
 
