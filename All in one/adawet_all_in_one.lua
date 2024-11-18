@@ -954,7 +954,7 @@ function add_ar_reshape_to_words(subtitles, selected_lines, active_line)
             end
             aegisub.set_undo_point(script_name)
             -- Clean up temporary files
-            cleanup_temp_files()
+            cleanup_reshape_temp_files()
         elseif button_pressed == "نسخ الكل" then
             -- Copy all text result to clipboard
             local all_corrections = {}
