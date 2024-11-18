@@ -1,4 +1,4 @@
-script_name = "عكس اتجاه الكلمات العربية"
+script_name = "تغيير شكل الكلمات العربية"
 script_description = "Reshape Arabic text."
 script_author = "Rise-KuN"
 script_version = "1.0.0"
