@@ -1,7 +1,7 @@
 script_name = "عكس اتجاه الكلمات العربية"
 script_description = "Reshape Arabic text."
 script_author = "Rise-KuN"
-script_version = "1.0.0"
+script_version = "1.0.1"
 
 import os
 import json
@@ -17,9 +17,17 @@ error_log_path = os.path.join(os.path.dirname(__file__), "error_log.txt")
 # Ensure the app data path exists
 os.makedirs(appdatapath, exist_ok=True)
 
+# Configuration for Arabic Reshaper
+configuration = {
+    'delete_harakat': False,
+    'support_ligatures': True,
+    'RIAL SIGN': True,  # Replace ر ي ا ل with ﷼
+}
+reshaper = arabic_reshaper.ArabicReshaper(configuration=configuration)
+
 # Function to reshape Arabic text for correct display
 def reshape_arabic(text):
-    reshaped_text = arabic_reshaper.reshape(text)
+    reshaped_text = reshaper.reshape(text)  # Apply the custom configuration
     bidi_text = get_display(reshaped_text)
     return bidi_text
 
