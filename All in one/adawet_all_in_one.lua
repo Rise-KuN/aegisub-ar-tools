@@ -1006,7 +1006,8 @@ aegisub.register_macro("أدوات/حذف نقاط آخر السطر", "حذف �
 aegisub.register_macro("أدوات/حذف علامة التعجب", "حذف علامة التعجب", remove_punctuation_2)
 aegisub.register_macro("أدوات/حذف تقسيم السطر", "حذف تقسيم السطر", remove_punctuation_3)
 aegisub.register_macro("أدوات/تغيير موضع الكليب", "تغيير موضع الكليب", adjust_clips)
-aegisub.register_macro("أدوات/عكس اتجاه الكلمات العربية", "عكس اتجاه الكلمات العربية", add_ar_reshape_to_words)
+aegisub.register_macro("أدوات/تغيير شكل الكلمات العربية", "تغيير شكل الكلمات العربية", add_ar_reshape_to_words)
+
 aegisub.register_macro("أدوات/حساب نسبة التقدم", "حساب نسبة التقدم", calculate_progress)
 aegisub.register_macro("أدوات/تعديل النصوص", "تعديل النصوص", edit_selected_text)
 aegisub.register_macro("أدوات/ترجمة متعددة", "ترجمة متعددة", translate_with_external_script)
