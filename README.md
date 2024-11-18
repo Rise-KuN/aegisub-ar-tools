@@ -31,3 +31,4 @@ Or Do It Manual via command prompt `cmd`:
 Press `Win + R`, Then type `cmd`, And hit Enter
 ```
 pip install requests python-dotenv transformers torch torchvision torchaudio sacremoses sentencepiece arabic-reshaper python-bidi
+```
