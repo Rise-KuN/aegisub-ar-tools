@@ -1,7 +1,7 @@
 script_name = "ترجمة متعددة"
 script_description = "ترجمة سطر مختار من لغة إلى لغة أخرى"
 script_author = "Rise-KuN"
-script_version = "4.1.1"
+script_version = "4.1.2"
 
 -- ترجمة من لغة إلى لغة أخرى
 
@@ -65,6 +65,14 @@ end
 function select_file_path()
     local file_path = aegisub.dialog.open("اختر ملف", "", "", "*.py", false, true)
     return file_path
+end
+
+-- Clean Temp Files
+local function cleanup_jptl_temp_files()
+    local translation_input_path = get_translation_input_path()
+    local translation_output_path = get_translation_output_path()
+    os.remove(translation_input_path)
+    os.remove(translation_output_path)
 end
 
 function translate_with_external_script(subtitles, selected_lines, active_line)
@@ -164,10 +172,7 @@ function translate_with_external_script(subtitles, selected_lines, active_line)
             end
             aegisub.set_undo_point(script_name)
             -- Clean up temporary files
-            local translation_input_path = get_translation_input_path()
-            local translation_output_path = get_translation_output_path()
-            os.remove(translation_input_path)
-            os.remove(translation_output_path)
+            cleanup_jptl_temp_files()
         elseif button_pressed == "نسخ الكل" then
             local all_translations = {}
             for i = 1, #translations do
@@ -175,22 +180,13 @@ function translate_with_external_script(subtitles, selected_lines, active_line)
             end
             clipboard.set(table.concat(all_translations, "\n"))
             -- Clean up temporary files
-            local translation_input_path = get_translation_input_path()
-            local translation_output_path = get_translation_output_path()
-            os.remove(translation_input_path)
-            os.remove(translation_output_path)
+            cleanup_jptl_temp_files()
         elseif button_pressed == "إلغاء" then
             -- Clean up temporary files
-            local translation_input_path = get_translation_input_path()
-            local translation_output_path = get_translation_output_path()
-            os.remove(translation_input_path)
-            os.remove(translation_output_path)
+            cleanup_jptl_temp_files()
         else
             -- Clean up temporary files
-            local translation_input_path = get_translation_input_path()
-            local translation_output_path = get_translation_output_path()
-            os.remove(translation_input_path)
-            os.remove(translation_output_path)
+            cleanup_jptl_temp_files()
         end
     else
         aegisub.debug.out("Error: Could not open translation_output.json. Please check if the Python script ran correctly.")
