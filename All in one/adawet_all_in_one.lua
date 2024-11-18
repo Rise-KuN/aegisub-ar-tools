@@ -1,7 +1,7 @@
 script_name = "أدوات"
 script_description = "أدوات متعددة الاستخدام"
 script_author = "Rise-KuN"
-script_version = "1.3.7"
+script_version = "1.3.8"
 
 include("unicode.lua")
 local json = require 'json'
@@ -818,7 +818,7 @@ function edit_selected_text(subtitles, selected_lines)
     end
 end
 
--- عكس اتجاه الكلمات العربية
+-- تغيير شكل الكلمات العربية
 local json = require 'json'
 local lfs = require 'lfs'
 local clipboard = require "clipboard"
@@ -1001,13 +1001,33 @@ function add_ar_reshape_to_words(subtitles, selected_lines, active_line)
     end
 end
 
+-- تغيير اتجاه الحروف
+function reverse_text(text)
+    local reversed = {}
+    -- Iterate through each character in the text using unicode.chars
+    for char in unicode.chars(text) do
+        -- Insert each character at the start of the table to reverse it
+        table.insert(reversed, 1, char) 
+    end
+    return table.concat(reversed) -- Join the table back into a string
+end
+
+function swap_characters(subtitles, selected_lines)
+    for _, i in ipairs(selected_lines) do
+        local line = subtitles[i]
+        line.text = reverse_text(line.text) -- Reverse the text
+        subtitles[i] = line
+    end
+    aegisub.set_undo_point(script_name)
+end
+
 aegisub.register_macro("أدوات/تصحيح نقاط آخر السطر", "تصحيح نقاط آخر السطر", fix_punctuation)
 aegisub.register_macro("أدوات/حذف نقاط آخر السطر", "حذف نقاط آخر السطر", remove_punctuation_1)
 aegisub.register_macro("أدوات/حذف علامة التعجب", "حذف علامة التعجب", remove_punctuation_2)
 aegisub.register_macro("أدوات/حذف تقسيم السطر", "حذف تقسيم السطر", remove_punctuation_3)
 aegisub.register_macro("أدوات/تغيير موضع الكليب", "تغيير موضع الكليب", adjust_clips)
 aegisub.register_macro("أدوات/تغيير شكل الكلمات العربية", "تغيير شكل الكلمات العربية", add_ar_reshape_to_words)
-
+aegisub.register_macro("أدوات/تغيير اتجاه الحروف", "تغيير اتجاه الحروف", swap_characters)
 aegisub.register_macro("أدوات/حساب نسبة التقدم", "حساب نسبة التقدم", calculate_progress)
 aegisub.register_macro("أدوات/تعديل النصوص", "تعديل النصوص", edit_selected_text)
 aegisub.register_macro("أدوات/ترجمة متعددة", "ترجمة متعددة", translate_with_external_script)
