@@ -6,3 +6,5 @@ torchvision
 torchaudio
 sacremoses
 sentencepiece
+arabic-reshaper
+python-bidi
