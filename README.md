@@ -2,6 +2,7 @@
 Aegisub Has many tools as we know but not for Arab Fansubbers, So we created these tools to make it easier for them.
 
 ## Tools
+- Adawet - All in one tools.
 - JPTL - Translate From `eng, jp` to `ar, eng`.
 - CR - Add Tachkeel To the selected lines `Arabic only`.
 - Calculate Progress - Based on the number of `current line, all lines`.
@@ -9,9 +10,8 @@ Aegisub Has many tools as we know but not for Arab Fansubbers, So we created the
 - Remove str - remove line break `\N` from the selected line.
 - Remove symbol - remove `!`" from the selected line.
 - Remove Period - remove `.` at the end of the selected line.
-- Swap clip - Swap clip from `LTR` to `RLT` or the opposite, (you can do it manual anyways).
 - Reshape AR Text - Reshape the text to make it support gardient and kareoke stuff.
-- Adawet - All in one tools.
+- Adjust Clip Positions - Change the positions of the `clip` or `iclip` from `LTR` to `RLT` or the opposite.
 
 > [!NOTE]
 > Some tools `Adawet`, `CR`, `JPTL`, `Reshape AR Text`, Require Python 3.9 or above.
