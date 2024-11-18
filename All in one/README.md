@@ -9,6 +9,7 @@
 - Remove Period - Remove `.` at the end of the selected line.
 - Text Editor - Edit the selected lines, also support `RLT` if you hit (right ctrl + right shift).
 - Reshape AR Text - Reshape the text to make it support gardient and kareoke stuff.
+- Reverse Characters Direction - Reverses the direction of characters.
 - Adjust Clip Positions - Change the positions of the `clip` or `iclip` from `LTR` to `RLT` or the opposite.
 
 > [!NOTE]
