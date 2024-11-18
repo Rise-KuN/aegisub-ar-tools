@@ -1,7 +1,9 @@
 script_name = "المُشكل"
 script_description = "تشكيل الكلمات العربية"
 script_author = "Rise-KuN"
-script_version = "2.1.3"
+script_version = "2.1.4"
+
+-- أداة المُشكل
 
 local json = require 'json'
 local lfs = require 'lfs'
@@ -124,6 +126,34 @@ function correct_words(subtitles, selected_lines, active_line)
         selected_text = selected_text
     }
     save_correction_input(translation_data)
+    
+    -- Open dialog to select Python file if not set
+    local cr_first_dialog = {
+        {class="label", label="", x=1, y=0, width=1, height=1},
+    }
+    local button, cr_result = aegisub.dialog.display(cr_first_dialog, {"التالي", "إلغاء", "مسار الأداة"})
+
+    -- If "مسار الأداة" is clicked, let the user select the Python file
+    if button == "مسار الأداة" then
+        config.file_path = select_cr_file_path()
+        if config.file_path then
+            save_cr_config(config)
+            aegisub.debug.out("Python script path set to: " .. config.file_path)
+        else
+            aegisub.debug.out("No Python file selected.")
+            return
+        end
+    elseif button == "التالي" then
+        -- Check if the config file exists
+        if not config.file_path or not io.open(config.file_path, "r") then
+            aegisub.debug.out("Configuration file does not exist or the path is invalid.")
+            return
+        end
+        -- Proceed with the next action if the config file exists
+        aegisub.debug.out("Configuration file found, proceeding.")
+    else
+        return
+    end
 
     -- Execute the Python script to perform corrections
     if config.file_path then
@@ -211,6 +241,15 @@ function correct_words(subtitles, selected_lines, active_line)
             os.remove(word_correction_mapping_path)
             local commit_hash_path = get_commit_hash_path()
             os.remove(commit_hash_path)
+        elseif button_pressed == "إلغاء" then
+            -- Clean up temporary files
+            os.remove(output_path)
+            local input_path = get_correction_input_path()
+            os.remove(input_path)
+            local word_correction_mapping_path = get_word_correction_mapping_path()
+            os.remove(word_correction_mapping_path)
+            local commit_hash_path = get_commit_hash_path()
+            os.remove(commit_hash_path) 
         else
             -- Clean up temporary files
             local output_path = get_correction_output_path()
