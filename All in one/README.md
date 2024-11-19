@@ -12,6 +12,7 @@
 - Reverse Characters Direction - Reverses the direction of characters.
 - Reverse Words Direction - Reverses the direction of words.
 - Adjust Clip Positions - Change the positions of the `clip` or `iclip` from `LTR` to `RLT` or the opposite.
+- Remove Text Between Characters/Words.
 
 > [!NOTE]
 > Some tools `CR`, `JPTL`, `Reshape AR Text`, Require Python 3.9 or above.
