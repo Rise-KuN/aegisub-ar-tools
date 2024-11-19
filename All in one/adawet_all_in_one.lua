@@ -1,7 +1,7 @@
 script_name = "أدوات"
 script_description = "أدوات متعددة الاستخدام"
 script_author = "Rise-KuN"
-script_version = "1.3.9"
+script_version = "1.4.0"
 
 include("unicode.lua")
 local json = require 'json'
@@ -977,7 +977,7 @@ function add_ar_reshape_to_words(subtitles, selected_lines, active_line)
 end
 
 -- تغيير اتجاه الحروف
-function reverse_text(text)
+function reverse_chars(text)
     local reversed = {}
     -- Iterate through each character in the text using unicode.chars
     for char in unicode.chars(text) do
@@ -990,7 +990,36 @@ end
 function swap_characters(subtitles, selected_lines)
     for _, i in ipairs(selected_lines) do
         local line = subtitles[i]
-        line.text = reverse_text(line.text) -- Reverse the text
+        line.text = reverse_chars(line.text) -- Reverse the characters
+        subtitles[i] = line
+    end
+    aegisub.set_undo_point(script_name)
+end
+
+-- تغيير اتجاه الكلمات
+function reverse_words(text)
+    local words = {}
+    local word_start = 1
+    -- Iterate through the text, finding word boundaries
+    for i = 1, #text + 1 do
+        local char = text:sub(i, i)
+        if char == " " or i > #text then
+            table.insert(words, text:sub(word_start, i - 1)) -- Add the word to the table
+            word_start = i + 1 -- Move to the next word
+        end
+    end
+    -- Reverse the order of words
+    local reversed_words = {}
+    for i = #words, 1, -1 do
+        table.insert(reversed_words, words[i])
+    end
+    return table.concat(reversed_words, " ") -- Join the words back with a space
+end
+
+function swap_words(subtitles, selected_lines)
+    for _, i in ipairs(selected_lines) do
+        local line = subtitles[i]
+        line.text = reverse_words(line.text) -- Reverse the words
         subtitles[i] = line
     end
     aegisub.set_undo_point(script_name)
@@ -1003,6 +1032,7 @@ aegisub.register_macro("أدوات/حذف تقسيم السطر", "حذف تقس
 aegisub.register_macro("أدوات/تغيير موضع الكليب", "تغيير موضع الكليب", adjust_clips)
 aegisub.register_macro("أدوات/تغيير شكل الكلمات العربية", "تغيير شكل الكلمات العربية", add_ar_reshape_to_words)
 aegisub.register_macro("أدوات/تغيير اتجاه الحروف", "تغيير اتجاه الحروف", swap_characters)
+aegisub.register_macro("أدوات/تغيير اتجاه الكلمات", "تغيير اتجاه الكلمات", swap_words)
 aegisub.register_macro("أدوات/حساب نسبة التقدم", "حساب نسبة التقدم", calculate_progress)
 aegisub.register_macro("أدوات/تعديل النصوص", "تعديل النصوص", edit_selected_text)
 aegisub.register_macro("أدوات/ترجمة متعددة", "ترجمة متعددة", translate_with_external_script)
