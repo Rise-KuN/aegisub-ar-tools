@@ -1,5 +1,5 @@
 script_name = "Reverse Characters Direction"
-script_description = "Reverses the direction of characters while maintaining UTF-8 integrity"
+script_description = "Reverses the direction of characters"
 script_author = "Rise-KuN"
 script_version = "1.0.0"
 
@@ -7,7 +7,7 @@ script_version = "1.0.0"
 -- Load the unicode library
 local unicode = require("unicode")
 
-function reverse_text(text)
+function reverse_chars(text)
     local reversed = {}
     -- Iterate through each character in the text using unicode.chars
     for char in unicode.chars(text) do
@@ -20,7 +20,7 @@ end
 function swap_characters(subtitles, selected_lines)
     for _, i in ipairs(selected_lines) do
         local line = subtitles[i]
-        line.text = reverse_text(line.text) -- Reverse the text
+        line.text = reverse_chars(line.text) -- Reverse the characters
         subtitles[i] = line
     end
     aegisub.set_undo_point(script_name)
