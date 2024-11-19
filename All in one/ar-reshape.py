@@ -20,8 +20,11 @@ os.makedirs(appdatapath, exist_ok=True)
 # Configuration for Arabic Reshaper
 configuration = {
     'delete_harakat': False,
+    'delete_tatweel': False,
     'support_ligatures': True,
-    'RIAL SIGN': True,  # Replace ر ي ا ل with ﷼
+    'support_zwj': False,
+    'shift_harakat_position': False,
+    'use_unshaped_instead_of_isolated': True,
 }
 reshaper = arabic_reshaper.ArabicReshaper(configuration=configuration)
 
