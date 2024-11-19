@@ -12,6 +12,7 @@ Aegisub Has many tools as we know but not for Arab Fansubbers, So we created the
 - Remove Period - remove `.` at the end of the selected line.
 - Reshape AR Text - Reshape the text to make it support gardient and kareoke stuff.
 - Reverse Characters Direction - Reverses the direction of characters.
+- Reverse Words Direction - Reverses the direction of words.
 - Adjust Clip Positions - Change the positions of the `clip` or `iclip` from `LTR` to `RLT` or the opposite.
 
 > [!NOTE]
