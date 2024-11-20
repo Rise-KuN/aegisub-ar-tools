@@ -1,18 +1,15 @@
 # All in one Tools
 
-- JPTL - Translate From `eng, jp` to `ar, eng`.
-- CR - Add Tachkeel To the selected lines `Arabic only`.
-- Calculate Progress - Based on the number of `current line, all lines`.
-- Fix Punctuation - fix the `. ! ؟` and make them at the end of the line In `RTL`.
-- Remove str - Remove line break `\N` from the selected line.
-- Remove symbol - Remove `!` from the selected line.
-- Remove Period - Remove `.` at the end of the selected line.
 - Text Editor - Edit the selected lines, also support `RLT` if you hit (right ctrl + right shift).
-- Reshape AR Text - Reshape the text to make it support gardient and kareoke stuff.
-- Reverse Characters Direction - Reverses the direction of characters.
-- Reverse Words Direction - Reverses the direction of words.
+- Mochakel - Add Tachkeel To the selected lines `Arabic only`.
+- Translate - Translate From `eng, jp` to `ar, eng`.
+- Reshape AR Text - Reshape the text to make it support gardient characters.
+- Fix Punctuation - fix the `. ! ؟` and make them at the end of the line In `RTL`.
+- Reverse Text - Reverses the direction of `Words` or `Characters` from the selected lines.
 - Adjust Clip Positions - Change the positions of the `clip` or `iclip` from `LTR` to `RLT` or the opposite.
+- Remove STR - Remove `.` `!` `\N` from the selected lines.
 - Remove Text Between Characters/Words.
+- Calculate Progress - Based on the number of `current line, all lines`.
 
 > [!NOTE]
 > Some tools `CR`, `JPTL`, `Reshape AR Text`, Require Python 3.9 or above.
