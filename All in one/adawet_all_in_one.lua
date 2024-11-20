@@ -1,7 +1,7 @@
 script_name = "أدوات"
 script_description = "أدوات متعددة الاستخدام"
 script_author = "Rise-KuN"
-script_version = "1.4.2"
+script_version = "1.4.3"
 
 include("unicode.lua")
 local json = require 'json'
@@ -305,112 +305,90 @@ function correct_words(subtitles, selected_lines, active_line)
     end
 end
 
--- حذف نقاط آخر السطر
-function remove_punctuation_1(subtitles, selected_lines, active_line)
-    local count = 0 -- Counter For Changed Words
-    local hasChanges = false -- Check If Any Changes Were Made
-
+-- 'أداة حذف 'نقاط آخر السطر' 'تقسيم السطر' علامة التعجب
+-- Function to remove periods
+function remove_periods(subtitles, selected_lines)
+    local count = 0
     for _, line_index in ipairs(selected_lines) do
         local line = subtitles[line_index]
         local text = line.text
 
-        -- Check if the line is in English
-        if text:match("[a-zA-Z]") then
-            -- Check if the line has before "\N"
-            local new_text, changes = text:gsub("%.%s*(\\N)", "%1")
-            if changes > 0 then
-                count = count + changes
-                hasChanges = true
-            end
-
-            -- Check if the line ends with a single "."
-            if new_text:match("[^.]%.$") then
-                -- Remove the last "."
-                new_text = new_text:sub(1, -2)
-                count = count + 1
-                hasChanges = true
-            end
-
-            line.text = new_text
-            subtitles[line_index] = line
-            
-        -- Check if the line is in Arabic
-        else
-            -- Check if the line contains more than one "."
-            if text:find("%.+") and not text:find("%.%.+") then
-                -- Remove "."
-                text = text:gsub("[.]", "")
-                count = count + 1
-                line.text = text
-                subtitles[line_index] = line
-                hasChanges = true
-            end
+        -- Remove period before line breaks
+        text = text:gsub("%.%s*(\\N)", "%1")
+        
+        -- Remove trailing period (not "...")
+        if text:sub(-1) == "." and text:sub(-3) ~= "..." then
+            text = text:sub(1, -2)
         end
-    end
 
-    if hasChanges then
-        aegisub.debug.out("تمَّ حذف " .. count .. " نقاط")
-    else
-        aegisub.debug.out("لا توجد أي تغييرات")
-    end
+        -- Remove trailing period in Arabic lines
+        text = text:gsub("%.$", "")
 
-    aegisub.set_undo_point(script_name)
-end
-
--- حذف علامة التعجب
-function remove_punctuation_2(subtitles, selected_lines, active_line)
-    local count = 0 -- Counter For Changed Words
-    local hasChanges = false -- Check If Any Changes Were Made
-
-    for _, line_index in ipairs(selected_lines) do
-        local line = subtitles[line_index]
-        local text = line.text
-
-        text = text:gsub("[%!]", "")
-		
-        -- Update The Count And Check If Any Changes Were Made
         if line.text ~= text then
-            count = count + 1
             line.text = text
             subtitles[line_index] = line
-            hasChanges = true
+            count = count + 1
         end
     end
-
-    if hasChanges then
-        aegisub.debug.out("تمَّ حذف " .. count .. " علامة التعجب")
-    else
-        aegisub.debug.out("لا توجد أي تغييرات")
-    end
-
-    aegisub.set_undo_point(script_name)
+    aegisub.debug.out("تمَّ حذف " .. count .. " نقاط\n\n")
 end
 
--- حذف تقسيم السطر
-function remove_punctuation_3(subtitles, selected_lines, active_line)
-    local count = 0 -- Counter For Changed Words
-    local hasChanges = false -- Check If Any Changes Were Made
-
+-- Function to remove line breaks
+function remove_line_breaks(subtitles, selected_lines)
+    local count = 0
     for _, line_index in ipairs(selected_lines) do
         local line = subtitles[line_index]
         local text = line.text
 
-        text = text:gsub("\\N", " ")
-        text = text:gsub("  ", " ")
-		
-        -- Update The Count And Check If Any Changes Were Made
+        -- Replace line breaks with spaces
+        text = text:gsub("\\N", " "):gsub("  ", " ")
+
         if line.text ~= text then
-            count = count + 1
             line.text = text
             subtitles[line_index] = line
-            hasChanges = true
+            count = count + 1
         end
     end
+    aegisub.debug.out("تمَّ حذف " .. count .. " تقسيم السطر\n\n")
+end
 
-    if hasChanges then
-        aegisub.debug.out("تمَّ حذف " .. count .. " تقسيم السطر")
-    else
-        aegisub.debug.out("لا توجد أي تغييرات")
+-- Function to remove exclamation marks
+function remove_exclamation_marks(subtitles, selected_lines)
+    local count = 0
+    for _, line_index in ipairs(selected_lines) do
+        local line = subtitles[line_index]
+        local text = line.text
+
+        -- Remove exclamation marks
+        text = text:gsub("!", "")
+
+        if line.text ~= text then
+            line.text = text
+            subtitles[line_index] = line
+            count = count + 1
+        end
+    end
+    aegisub.debug.out("تمَّ حذف " .. count .. " علامة التعجب\n\n")
+end
+
+-- Remove Tool Pop-Up Dialogue
+function remove_tool(subtitles, selected_lines, active_line)
+    local remove_choices = {"نقاط آخر السطر", "تقسيم السطر", "علامة التعجب"}
+    local dialog = {
+        {class="label", label=":اختر نوع الحذف", x=1, y=0, width=2, height=1},
+        {class="dropdown", name="remove", items=remove_choices, value=remove_choices[1], x=0, y=0, width=1, height=1}
+    }
+    local button, result = aegisub.dialog.display(dialog, {"اختيار", "إلغاء"})
+    if button ~= "اختيار" then return end
+
+    local remove_type = result.remove
+
+    if remove_type == "نقاط آخر السطر" then
+        remove_periods(subtitles, selected_lines)
+    elseif remove_type == "تقسيم السطر" then
+        remove_line_breaks(subtitles, selected_lines)
+    elseif remove_type == "علامة التعجب" then
+        remove_exclamation_marks(subtitles, selected_lines)
     end
 
     aegisub.set_undo_point(script_name)
@@ -1169,15 +1147,13 @@ function escape_lua_pattern(str)
     return str:gsub("([%.%^%$%(%)%[%]%%%+%-%?])", "%%%1")
 end
 
-aegisub.register_macro("أدوات/تصحيح نقاط آخر السطر", "تصحيح نقاط آخر السطر", fix_punctuation)
-aegisub.register_macro("أدوات/حذف نقاط آخر السطر", "حذف نقاط آخر السطر", remove_punctuation_1)
-aegisub.register_macro("أدوات/حذف علامة التعجب", "حذف علامة التعجب", remove_punctuation_2)
-aegisub.register_macro("أدوات/حذف تقسيم السطر", "حذف تقسيم السطر", remove_punctuation_3)
-aegisub.register_macro("أدوات/تغيير موضع الكليب", "تغيير موضع الكليب", adjust_clips)
-aegisub.register_macro("أدوات/تغيير شكل الكلمات العربية", "تغيير شكل الكلمات العربية", add_ar_reshape_to_words)
-aegisub.register_macro("أدوات/تغيير اتجاه النص", "تغيير اتجاه النص", reverse_text_direction)
-aegisub.register_macro("أدوات/حساب نسبة التقدم", "حساب نسبة التقدم", calculate_progress)
-aegisub.register_macro("أدوات/تعديل النصوص", "تعديل النصوص", edit_selected_text)
-aegisub.register_macro("أدوات/ترجمة متعددة", "ترجمة متعددة", translate_with_external_script)
-aegisub.register_macro("أدوات/المُشكل", "المُشكل", correct_words)
-aegisub.register_macro("أدوات/حذف ما بين الكلمات", "حذف ما بين الكلمات", remove_text_between_characters)
+aegisub.register_macro("أدوات/10 - حساب نسبة التقدم", "حساب نسبة التقدم", calculate_progress)
+aegisub.register_macro("أدوات/09 - حذف ما بين الكلمات", "حذف ما بين الكلمات", remove_text_between_characters)
+aegisub.register_macro("أدوات/08 - أداة الحذف", "أداة الحذف", remove_tool)
+aegisub.register_macro("أدوات/07 - تغيير موضع الكليب", "تغيير موضع الكليب", adjust_clips)
+aegisub.register_macro("أدوات/06 - تغيير اتجاه النص", "تغيير اتجاه النص", reverse_text_direction)
+aegisub.register_macro("أدوات/05 - تصحيح نقاط آخر السطر", "تصحيح نقاط آخر السطر", fix_punctuation)
+aegisub.register_macro("أدوات/04 - تغيير شكل الكلمات العربية", "تغيير شكل الكلمات العربية", add_ar_reshape_to_words)
+aegisub.register_macro("أدوات/03 - ترجمة متعددة", "ترجمة متعددة", translate_with_external_script)
+aegisub.register_macro("أدوات/02 - المُشكل", "المُشكل", correct_words)
+aegisub.register_macro("أدوات/01 - تعديل النصوص", "تعديل النصوص", edit_selected_text)
