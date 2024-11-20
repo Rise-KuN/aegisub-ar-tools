@@ -12,7 +12,7 @@ local clipboard = require "clipboard"
 -- Directory for configuration
 function get_cr_config_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\CR"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\mochakel"
     lfs.mkdir(config_dir)
     return config_dir .. "\\config.json"
 end
@@ -20,7 +20,7 @@ end
 -- Get word correction mapping file
 function get_word_correction_mapping_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\CR"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\mochakel"
     lfs.mkdir(config_dir)
     return config_dir .. "\\word-correction-mapping.json"
 end
@@ -28,7 +28,7 @@ end
 -- Get commit hash
 function get_commit_hash_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\CR"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\mochakel"
     lfs.mkdir(config_dir)
     return config_dir .. "\\commit_hash.json"
 end
@@ -36,7 +36,7 @@ end
 -- Temporary file for input data
 function get_correction_input_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\CR"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\mochakel"
     lfs.mkdir(config_dir)
     return config_dir .. "\\cr_input.json"
 end
@@ -44,7 +44,7 @@ end
 -- Output file for corrections
 function get_correction_output_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\CR"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\mochakel"
     return config_dir .. "\\cr_output.json"
 end
 
