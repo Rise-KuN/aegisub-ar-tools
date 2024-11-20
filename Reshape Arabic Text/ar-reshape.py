@@ -1,7 +1,7 @@
 script_name = "عكس اتجاه الكلمات العربية"
 script_description = "Reshape Arabic text."
 script_author = "Rise-KuN"
-script_version = "1.0.1"
+script_version = "1.0.2"
 
 import os
 import json
@@ -9,7 +9,7 @@ import arabic_reshaper
 from bidi.algorithm import get_display
 
 # Paths
-appdatapath = os.getenv('APPDATA') + "\\Aegisub\\AR-Reshape"
+appdatapath = os.getenv('APPDATA') + "\\Aegisub\\adawet\\AR-Reshape"
 input_path = os.path.join(appdatapath, "ar_reshape_input.json")
 output_path = os.path.join(appdatapath, "ar_reshape_output.json")
 error_log_path = os.path.join(os.path.dirname(__file__), "error_log.txt")
