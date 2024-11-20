@@ -1,7 +1,7 @@
-script_name = "ترجمة متعددة"
-script_description = "ترجمة سطر مختار من لغة إلى لغة أخرى"
+script_name = "المُشكل"
+script_description = "تشكيل الكلمات العربية"
 script_author = "Rise-KuN"
-script_version = "2.1.2"
+script_version = "2.1.5"
 
 import os
 import json
@@ -9,7 +9,7 @@ import re
 import requests
 
 # Paths
-appdatapath = os.getenv('APPDATA') + "\\Aegisub\\CR"
+appdatapath = os.getenv('APPDATA') + "\\Aegisub\\adawet\\mochakel"
 input_path = os.path.join(appdatapath, "cr_input.json")
 output_path = os.path.join(appdatapath, "cr_output.json")
 saved_version_path = os.path.join(appdatapath, "word-correction-mapping.json")
