@@ -18,8 +18,8 @@ commit_hash_path = os.path.join(appdatapath, "commit_hash.json")
 error_log_path = os.path.join(os.path.dirname(__file__), "error_log.txt")
 
 # URLs for the correction mapping JSON and commit history on GitHub
-correction_url = "https://raw.githubusercontent.com/Rise-KuN/aegisub-ar-tools/main/CR/Word%20Correction%20Mapping/word-correction-mapping.json"
-commit_url = "https://api.github.com/repos/Rise-KuN/aegisub-ar-tools/commits?path=CR/Word%20Correction%20Mapping/word-correction-mapping.json"
+correction_url = "https://raw.githubusercontent.com/Rise-KuN/aegisub-ar-tools/main/Mochakel/Word%20Correction%20Mapping/word-correction-mapping.json"
+commit_url = "https://api.github.com/repos/Rise-KuN/aegisub-ar-tools/commits?path=Mochakel/Word%20Correction%20Mapping/word-correction-mapping.json"
 
 # Ensure the app data path exists
 os.makedirs(appdatapath, exist_ok=True)
