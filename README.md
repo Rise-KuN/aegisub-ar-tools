@@ -11,7 +11,7 @@ Aegisub Has many tools as we know but not for Arab Fansubbers, So we created the
 - Reverse Text - Reverses the direction of `Words` or `Characters` from the selected lines.
 - Adjust Clip Positions - Change the positions of the `clip` or `iclip` from `LTR` to `RLT` or the opposite.
 - Remove STR - Remove `.` `!` `\N` from the selected lines.
-- Remove Text Between Characters/Words.
+- Remove Text Between `Characters` or `Words`.
 - Calculate Progress - Based on the number of `current line, all lines`.
 
 > [!NOTE]
