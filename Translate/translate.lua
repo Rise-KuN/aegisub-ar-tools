@@ -12,7 +12,7 @@ local clipboard = require "clipboard"
 -- Directory for configuration
 function get_config_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\JPTL"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\translate"
     lfs.mkdir(config_dir)
     return config_dir .. "\\config.json"
 end
@@ -20,7 +20,7 @@ end
 -- Input file for translation
 function get_translation_input_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\JPTL"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\translate"
     lfs.mkdir(config_dir)
     return config_dir .. "\\translation_input.json"
 end
@@ -28,7 +28,7 @@ end
 -- Output file for translation
 function get_translation_output_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\JPTL"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\translate"
     return config_dir .. "\\translation_output.json"
 end
 
