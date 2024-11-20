@@ -1,7 +1,7 @@
 script_name = "تغيير شكل الكلمات العربية"
 script_description = "Reshape arabic text"
 script_author = "Rise-KuN"
-script_version = "1.0.1"
+script_version = "1.0.2"
 
 -- تغيير شكل الكلمات العربية
 
@@ -12,7 +12,7 @@ local clipboard = require "clipboard"
 -- Directory for configuration
 function get_ar_reshape_config_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\AR-Reshape"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\AR-Reshape"
     lfs.mkdir(config_dir)
     return config_dir .. "\\config.json"
 end
@@ -20,7 +20,7 @@ end
 -- Temporary file for input data
 function get_ar_reshape_input_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\AR-Reshape"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\AR-Reshape"
     lfs.mkdir(config_dir)
     return config_dir .. "\\ar_reshape_input.json"
 end
@@ -28,7 +28,7 @@ end
 -- Output file for ar_reshape
 function get_ar_reshape_output_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\AR-Reshape"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\AR-Reshape"
     return config_dir .. "\\ar_reshape_output.json"
 end
 
