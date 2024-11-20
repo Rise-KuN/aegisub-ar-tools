@@ -1,7 +1,7 @@
 script_name = "أدوات"
 script_description = "أدوات متعددة الاستخدام"
 script_author = "Rise-KuN"
-script_version = "1.4.4"
+script_version = "1.4.2"
 
 include("unicode.lua")
 local json = require 'json'
