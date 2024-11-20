@@ -1,3 +1,8 @@
+script_name = "ترجمة متعددة"
+script_description = "ترجمة سطر مختار من لغة إلى لغة أخرى"
+script_author = "Rise-KuN"
+script_version = "4.1.2"
+
 import os
 import json
 from os import path
@@ -9,7 +14,7 @@ load_dotenv()
 HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
 headers = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
 
-appdatapath = '%APPDATA%\\Aegisub\\JPTL'
+appdatapath = '%APPDATA%\\Aegisub\\adawet\\translate'
 if '%' in appdatapath:
     appdatapath = path.expandvars(appdatapath)
 
