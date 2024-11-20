@@ -1,7 +1,7 @@
 script_name = "أدوات"
 script_description = "أدوات متعددة الاستخدام"
 script_author = "Rise-KuN"
-script_version = "1.4.3"
+script_version = "1.4.4"
 
 include("unicode.lua")
 local json = require 'json'
@@ -66,7 +66,7 @@ end
 -- Directory for configuration
 function get_cr_config_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\CR"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\mochakel"
     lfs.mkdir(config_dir)
     return config_dir .. "\\config.json"
 end
@@ -74,7 +74,7 @@ end
 -- Get word correction mapping file
 function get_word_correction_mapping_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\CR"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\mochakel"
     lfs.mkdir(config_dir)
     return config_dir .. "\\word-correction-mapping.json"
 end
@@ -82,7 +82,7 @@ end
 -- Get commit hash
 function get_commit_hash_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\CR"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\mochakel"
     lfs.mkdir(config_dir)
     return config_dir .. "\\commit_hash.json"
 end
@@ -90,7 +90,7 @@ end
 -- Temporary file for input data
 function get_correction_input_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\CR"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\mochakel"
     lfs.mkdir(config_dir)
     return config_dir .. "\\cr_input.json"
 end
@@ -98,7 +98,7 @@ end
 -- Output file for corrections
 function get_correction_output_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\CR"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\mochakel"
     return config_dir .. "\\cr_output.json"
 end
 
@@ -560,7 +560,7 @@ end
 -- Directory for configuration
 function get_config_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\JPTL"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\translate"
     lfs.mkdir(config_dir)
     return config_dir .. "\\config.json"
 end
@@ -568,7 +568,7 @@ end
 -- Input file for translation
 function get_translation_input_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\JPTL"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\translate"
     lfs.mkdir(config_dir)
     return config_dir .. "\\translation_input.json"
 end
@@ -576,7 +576,7 @@ end
 -- Output file for translation
 function get_translation_output_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\JPTL"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\translate"
     return config_dir .. "\\translation_output.json"
 end
 
@@ -783,7 +783,7 @@ end
 -- Directory for configuration
 function get_ar_reshape_config_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\AR-Reshape"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\AR-Reshape"
     lfs.mkdir(config_dir)
     return config_dir .. "\\config.json"
 end
@@ -791,7 +791,7 @@ end
 -- Temporary file for input data
 function get_ar_reshape_input_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\AR-Reshape"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\AR-Reshape"
     lfs.mkdir(config_dir)
     return config_dir .. "\\ar_reshape_input.json"
 end
@@ -799,7 +799,7 @@ end
 -- Output file for ar_reshape
 function get_ar_reshape_output_path()
     local appdata = os.getenv("APPDATA")
-    local config_dir = appdata .. "\\Aegisub\\AR-Reshape"
+    local config_dir = appdata .. "\\Aegisub\\adawet\\AR-Reshape"
     return config_dir .. "\\ar_reshape_output.json"
 end
 
