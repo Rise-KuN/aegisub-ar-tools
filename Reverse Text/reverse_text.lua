@@ -3,6 +3,8 @@ script_description = "Reverses the direction of characters or words"
 script_author = "Rise-KuN"
 script_version = "1.0.0"
 
+-- تغيير اتجاه النص
+
 -- Load the unicode library
 local unicode = require("unicode")
 
