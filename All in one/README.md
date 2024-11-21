@@ -7,6 +7,7 @@
 - Fix Punctuation - fix the `. ! ؟` and make them at the end of the line In `RTL`.
 - Reverse Text - Reverses the direction of `Words` or `Characters` from the selected lines.
 - Adjust Clip Positions - Change the positions of the `clip` or `iclip` from `LTR` to `RLT` or the opposite.
+- Split Line To Frames - Split The line to frames based on `start_time`, `end_time`, and `fps`.
 - Remove STR - Remove `.` `!` `\N` from the selected lines.
 - Remove Text Between `Characters` or `Words`.
 - Calculate Progress - Based on the number of `current line, all lines`.
