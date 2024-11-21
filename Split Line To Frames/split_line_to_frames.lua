@@ -21,9 +21,9 @@ function split_line_to_frames(subtitles, selected_lines)
     aegisub.progress.task("Splitting line to frames...")
 
     -- Default frame rate
-    --local frame_rate = 23.976
-	local frame_rate = calculate_fps()
-    aegisub.debug.out("frame rate: " .. frame_rate .. " fps\n")
+    -- local frame_rate = 23.976
+    local frame_rate = calculate_fps()
+    -- aegisub.debug.out("frame rate: " .. frame_rate .. " fps\n")
 	
 	-- Frame duration in milliseconds
     local frame_duration = 1000 / frame_rate
