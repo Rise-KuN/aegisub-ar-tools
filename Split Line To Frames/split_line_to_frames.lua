@@ -3,6 +3,8 @@ script_description = "Splits a line to individual frames"
 script_author = "Rise-KuN"
 script_version = "1.0"
 
+-- تقسيم السطر إلى فريمات
+
 -- Calculate the video frame rate
 function calculate_fps()
     local start_ms = 0  -- Starting time in milliseconds
