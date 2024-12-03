@@ -1,7 +1,7 @@
 script_name = "أدوات"
 script_description = "أدوات متعددة الاستخدام"
 script_author = "Rise-KuN"
-script_version = "1.4.4"
+script_version = "1.4.5"
 
 include("unicode.lua")
 local json = require 'json'
@@ -306,12 +306,26 @@ function correct_words(subtitles, selected_lines, active_line)
 end
 
 -- 'أداة حذف 'نقاط آخر السطر' 'تقسيم السطر' علامة التعجب
--- Function to remove trailing periods for Arabic and English while preserving \N
+-- Remove Periods for Arabic and English
 function remove_periods(subtitles, selected_lines)
     local count = 0
     for _, line_index in ipairs(selected_lines) do
         local line = subtitles[line_index]
         local text = line.text
+
+        -- Check for the Arabic special character
+        local function count_special_arabic_periods(text)
+            local count = 0
+            for _ in text:gmatch("‏%.‏") do
+                count = count + 1
+            end
+            return count
+        end
+
+        -- Debugging: count periods
+        local arabic_special_period = count_special_arabic_periods(text)
+        --aegisub.debug.out("Text:" .. text .. "\n\n")
+        --aegisub.debug.out("Number of RTL periods:" .. arabic_period_count .. "\n\n\n")
 
         -- Temporarily replace \N with a placeholder __&__
         text = text:gsub("\\N", "__&__")
@@ -327,16 +341,25 @@ function remove_periods(subtitles, selected_lines)
             end
 
         -- Handle Arabic text
+        elseif arabic_special_period > 0 then
+            -- Temporarily replace "..." with a placeholder
+            text = text:gsub("%.%.%.", "___$___")
+            -- Process Arabic special character periods
+            text = text:gsub("‏%.‏%s*(__&__)", "%1")   -- Remove RTL period before \N
+            text = text:gsub("(__&__)%s*‏%.‏", "%1")   -- Remove RTL period after \N
+            text = text:gsub("‏%.‏$", "")              -- Remove trailing RTL period
+            -- Restore the ellipsis
+            text = text:gsub("___$___", "...")
         else
-            -- Replace the ellipsis with a placeholder at first to ensure its remains intact
-            text = text:gsub("%.%.%.", "___$___")  -- Temporarily replace "..." with a placeholder
-            -- Remove end of line periods before and after line breaks \N except ellipses "..."
-            text = text:gsub("%.%s*(?=__&__)", "")  -- Remove periods before \N
-            text = text:gsub("__&__%s*%.", "__&__")  -- Remove periods after \N
-            text = text:gsub("%.$", "")  -- Remove periods at the end of the line
-            text = text:gsub("^%.", "")  -- Remove periods at the beginning of the line
-            -- text = text:gsub("[.]", "")  -- Remove all remaining periods
-            text = text:gsub("___$___", "...")  -- Restore the ellipsis
+            -- Temporarily replace "..." with a placeholder
+            text = text:gsub("%.%.%.", "___$___")
+            -- Process Arabic standard periods
+            text = text:gsub("%.%s*(?=__&__)", "")    -- Remove periods before \N
+            text = text:gsub("__&__%s*%.", "__&__")   -- Remove periods after \N
+            text = text:gsub("%.$", "")               -- Remove periods at the end of the line
+            text = text:gsub("^%.", "")               -- Remove periods at the beginning of the line
+            -- Restore the ellipsis
+            text = text:gsub("___$___", "...")
         end
 
         -- Make the \N like it was by replacing __&__ to \N
