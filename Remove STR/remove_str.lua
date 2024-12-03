@@ -1,7 +1,7 @@
 script_name = "Remove STR Tool"
 script_description = "أداة حذف نقاط آخر السطر وتقسيم السطر وعلامة التعجب"
 script_author = "Rise-KuN"
-script_version = "1.0.1"
+script_version = "1.0.2"
 
 -- 'أداة حذف 'نقاط آخر السطر' 'تقسيم السطر' علامة التعجب
 -- Function to remove trailing periods for Arabic and English while preserving \N
