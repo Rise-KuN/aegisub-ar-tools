@@ -28,17 +28,17 @@ function remove_periods(subtitles, selected_lines)
         -- Temporarily replace \N with a placeholder __&__
         text = text:gsub("\\N", "__&__")
 
-        -- Handle English Text
+        -- Handle Periods in English Text
         if text:match("[a-zA-Z]") then
-            -- Remove end of line periods before and after line breaks \N except ellipses "..."
-            text = text:gsub("%.%s*(__&__)", "%1")  -- Period before __&__
-            text = text:gsub("(__&__)%.%s*", "%1")  -- Period after __&__
-            -- Remove trailing period except ("...")
-            if text:sub(-1) == "." and text:sub(-3) ~= "..." then
-                text = text:sub(1, -2)
-            end
+            -- Temporarily replace "..." with a placeholder
+            text = text:gsub("%.%.%.", "___$___")  -- Temporarily replace "..." with a placeholder
+            -- Process english periods
+            text = text:gsub("%.%s*__&__", "__&__")     -- Remove periods before \N
+            text = text:gsub("%.$", "")                 -- Remove periods at the end of the line
+            -- Restore the ellipsis
+            text = text:gsub("___$___", "...")
 
-        -- Handle Arabic text
+        -- Handle Special Periods in Arabic text 
         elseif arabic_special_period > 0 then
             -- Temporarily replace "..." with a placeholder
             text = text:gsub("%.%.%.", "___$___")
@@ -48,6 +48,8 @@ function remove_periods(subtitles, selected_lines)
             text = text:gsub("‏%.‏$", "")              -- Remove trailing RTL period
             -- Restore the ellipsis
             text = text:gsub("___$___", "...")
+
+        -- Handle Standard Periods in Arabic text 
         else
             -- Temporarily replace "..." with a placeholder
             text = text:gsub("%.%.%.", "___$___")
