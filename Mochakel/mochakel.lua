@@ -100,7 +100,7 @@ end
 
 -- Clean Temp Files
 local function cleanup_cr_temp_files()
-    local output_path = get_correction_input_path()
+    local output_path = get_correction_output_path()
     os.remove(output_path)
     local input_path = get_correction_input_path()
     os.remove(input_path)
