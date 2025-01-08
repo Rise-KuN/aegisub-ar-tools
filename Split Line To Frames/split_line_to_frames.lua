@@ -1,9 +1,24 @@
 script_name = "Split Line to Frames"
 script_description = "Splits a line to individual frames"
 script_author = "Rise-KuN"
-script_version = "1.0"
+script_version = "1.0.1"
 
 -- تقسيم السطر إلى فريمات
+-- Helper function to deep copy a table
+function deep_copy(orig)
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[deep_copy(orig_key)] = deep_copy(orig_value)
+        end
+        setmetatable(copy, deep_copy(getmetatable(orig)))
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
+end
 
 -- Calculate the video frame rate
 function calculate_fps()
@@ -23,9 +38,9 @@ function split_line_to_frames(subtitles, selected_lines)
     -- Default frame rate
     -- local frame_rate = 23.976
     local frame_rate = calculate_fps()
-    -- aegisub.debug.out("frame rate: " .. frame_rate .. " fps\n")
-	
-	-- Frame duration in milliseconds
+    aegisub.debug.out("frame rate: " .. frame_rate .. " fps\n")
+
+    -- Frame duration in milliseconds
     local frame_duration = 1000 / frame_rate
 
     for _, i in ipairs(selected_lines) do
@@ -38,7 +53,7 @@ function split_line_to_frames(subtitles, selected_lines)
         local num_frames = math.floor(duration / frame_duration)
 
         for frame = 0, num_frames - 1 do
-            local new_line = table.copy(line)
+            local new_line = deep_copy(line)
             new_line.start_time = start_time + frame * frame_duration
             new_line.end_time = math.min(new_line.start_time + frame_duration, end_time)
             subtitles.insert(i + frame, new_line)
