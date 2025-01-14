@@ -4,7 +4,8 @@
 - Mochakel - Add Tachkeel To the selected lines `Arabic only`.
 - Translate - Translate From `eng, jp` to `ar, eng`.
 - Reshape AR Text - Reshape the text to make it support gardient characters.
-- Fix Punctuation - fix the `. ! ؟` and make them at the end of the line In `RTL`.
+- Fix Punctuation Unicode - fix the `. ! ؟` and make them at the end of the line In `RTL`.
+- Fix Punctuation V2 - fix the `.` `!` `،` `:` `؛` `...` + more and makes them at the end of the line In `RTL`.
 - Reverse Text - Reverses the direction of `Words` or `Characters` from the selected lines.
 - Adjust Clip Positions - Change the positions of the `clip` or `iclip` from `LTR` to `RLT` or the opposite.
 - Split Line To Frames - Split The line to frames based on `start_time`, `end_time`, and `fps`.
