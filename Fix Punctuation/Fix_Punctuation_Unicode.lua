@@ -21,7 +21,7 @@ lookup = {
  ['،'] = '‏،‏', 
 }
 
-function fix_punctuation(subtitles, selected_lines, active_line)
+function fix_punctuation_unicode(subtitles, selected_lines, active_line)
 	for z, i in ipairs(selected_lines) do
 		local l = subtitles[i]
 		
@@ -58,4 +58,4 @@ function fix_punctuation(subtitles, selected_lines, active_line)
 	aegisub.set_undo_point("Punctuation fix")
 end
 
-aegisub.register_macro("تصحيح نقاط آخر السطر", "تصحيح نقاط آخر السطر", fix_punctuation)
+aegisub.register_macro("تصحيح نقاط آخر السطر", "تصحيح نقاط آخر السطر", fix_punctuation_unicode)
