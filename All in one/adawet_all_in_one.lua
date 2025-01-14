@@ -1,7 +1,7 @@
 script_name = "أدوات"
 script_description = "أدوات متعددة الاستخدام"
 script_author = "Rise-KuN"
-script_version = "1.4.5"
+script_version = "1.4.7"
 
 include("unicode.lua")
 local json = require 'json'
@@ -24,8 +24,7 @@ lookup = {
  ['،'] = '‏،‏', 
 }
 
--- تصحيح النقاط آخر السطر
-function fix_punctuation(subtitles, selected_lines, active_line)
+function fix_punctuation_unicode(subtitles, selected_lines, active_line)
 	for z, i in ipairs(selected_lines) do
 		local l = subtitles[i]
 		
@@ -60,6 +59,109 @@ function fix_punctuation(subtitles, selected_lines, active_line)
 		subtitles[i] = l
 	end
 	aegisub.set_undo_point("Punctuation fix")
+end
+
+-- تصحيح موضع العلامات والنقاط
+function fix_punctuation(subtitles, selected_lines, active_line)
+    -- Punctuation marks List
+    local punctuation = {
+        "!", ":", "؛", "،", "%.", "%.%.%.", "%-", "%_", "%$", "%@", "«", "»", '"', "%[", "%]"
+    }
+    
+    local pattern = "([" .. table.concat(punctuation, "") .. "]+)(%s*)$"
+
+    for _, line_index in ipairs(selected_lines) do
+        local line = subtitles[line_index]
+        local original_text = line.text
+        local text = original_text
+        local punctuation_count = 0
+
+        -- Create a list to store parts of the line (text and tags)
+        local parts = {}
+        local tag_parts = {}
+
+        -- Split the line into text and tags preserving the structure
+        local function split_text_and_tags(text)
+            local i = 1
+            while i <= #text do
+                local char = text:sub(i, i)
+                if char == "{" then
+                    local tag = text:match("{[^}]*}", i)
+                    if tag then
+                        table.insert(parts, tag)
+                        i = i + #tag
+                    end
+                else
+                    local non_tag = text:match("([^{]*)", i)
+                    table.insert(parts, non_tag)
+                    i = i + #non_tag
+                end
+            end
+        end
+        split_text_and_tags(text)
+
+        -- Remove spaces between \N
+        local function clean_up_n_space(parts)
+            for i, part in ipairs(parts) do
+                -- Remove leading and trailing spaces around \N
+                parts[i] = part:gsub("%s*\\N%s*", "\\N")
+            end
+        end
+        clean_up_n_space(parts)
+
+        -- Handle the text parts
+        local function process_with_punctuation(parts)
+            -- Split the text to parts based on \N
+            local segments = {}
+            for _, part in ipairs(parts) do
+                -- Only process the part if its not a tag
+                if not part:match("^{.*}$") then
+                    -- Split by \N to handle each segment separately
+                    local sub_parts = {}
+                    for sub_part in part:gmatch("[^\\N]+") do
+                        table.insert(sub_parts, sub_part)
+                    end
+
+                    -- Process each sub_part and move punctuations from the end to the start
+                    for i, sub_part in ipairs(sub_parts) do
+                        local punc_at_end = sub_part:match(pattern)
+                        if punc_at_end then
+                            punctuation_count = punctuation_count + 1
+                            sub_part = sub_part:gsub(pattern, "")
+                            sub_part = punc_at_end .. sub_part
+                            sub_parts[i] = sub_part
+                        end
+                    end
+
+                    -- Rejoin the sub_parts and add the processed segment
+                    local new_segment = table.concat(sub_parts, "\\N")
+                    table.insert(segments, new_segment)
+                else
+                    -- If it's a tag add it without modification
+                    table.insert(segments, part)
+                end
+            end
+            return segments
+        end
+
+        -- Process punctuation handling
+        parts = process_with_punctuation(parts)
+
+        -- Rebuild the text from the processed parts
+        text = table.concat(parts)
+
+        -- Debugging
+        --aegisub.debug.out("Line: " .. line_index .. "\n")
+        --aegisub.debug.out("Original Text: " .. original_text .. "\n")
+        --aegisub.debug.out("Modified Text: " .. text .. "\n")
+        --aegisub.debug.out("Punctuation Detected: " .. punctuation_count .. "\n\n")
+
+        -- Update the line text
+        line.text = text
+        subtitles[line_index] = line
+    end
+
+    aegisub.set_undo_point(script_name)
 end
 
 -- أداة المُشكل
@@ -330,17 +432,17 @@ function remove_periods(subtitles, selected_lines)
         -- Temporarily replace \N with a placeholder __&__
         text = text:gsub("\\N", "__&__")
 
-        -- Handle Periods in English Text
+        -- Handle English Text
         if text:match("[a-zA-Z]") then
-            -- Temporarily replace "..." with a placeholder
-            text = text:gsub("%.%.%.", "___$___")  -- Temporarily replace "..." with a placeholder
-            -- Process english periods
-            text = text:gsub("%.%s*__&__", "__&__")     -- Remove periods before \N
-            text = text:gsub("%.$", "")                 -- Remove periods at the end of the line
-            -- Restore the ellipsis
-            text = text:gsub("___$___", "...")
+            -- Remove end of line periods before and after line breaks \N except ellipses "..."
+            text = text:gsub("%.%s*(__&__)", "%1")  -- Period before __&__
+            text = text:gsub("(__&__)%.%s*", "%1")  -- Period after __&__
+            -- Remove trailing period except ("...")
+            if text:sub(-1) == "." and text:sub(-3) ~= "..." then
+                text = text:sub(1, -2)
+            end
 
-        -- Handle Special Periods in Arabic text 
+        -- Handle Arabic text
         elseif arabic_special_period > 0 then
             -- Temporarily replace "..." with a placeholder
             text = text:gsub("%.%.%.", "___$___")
@@ -350,8 +452,6 @@ function remove_periods(subtitles, selected_lines)
             text = text:gsub("‏%.‏$", "")              -- Remove trailing RTL period
             -- Restore the ellipsis
             text = text:gsub("___$___", "...")
-
-        -- Handle Standard Periods in Arabic text 
         else
             -- Temporarily replace "..." with a placeholder
             text = text:gsub("%.%.%.", "___$___")
@@ -584,7 +684,7 @@ function split_line_to_frames(subtitles, selected_lines)
     -- Default frame rate
     -- local frame_rate = 23.976
     local frame_rate = calculate_fps()
-    aegisub.debug.out("frame rate: " .. frame_rate .. " fps\n")
+    --aegisub.debug.out("frame rate: " .. frame_rate .. " fps\n")
 
     -- Frame duration in milliseconds
     local frame_duration = 1000 / frame_rate
@@ -1254,14 +1354,15 @@ function escape_lua_pattern(str)
     return str:gsub("([%.%^%$%(%)%[%]%%%+%-%?])", "%%%1")
 end
 
-aegisub.register_macro("أدوات/11 - حساب نسبة التقدم", "حساب نسبة التقدم", calculate_progress)
-aegisub.register_macro("أدوات/10 - حذف ما بين الكلمات", "حذف ما بين الكلمات", remove_text_between_characters)
-aegisub.register_macro("أدوات/09 - أداة الحذف", "أداة الحذف", remove_tool)
-aegisub.register_macro("أدوات/08 - تقسيم السطر إلى فريمات", "تقسيم السطر إلى فريمات", split_line_to_frames)
-aegisub.register_macro("أدوات/07 - تغيير موضع الكليب", "تغيير موضع الكليب", adjust_clips)
-aegisub.register_macro("أدوات/06 - تغيير اتجاه النص", "تغيير اتجاه النص", reverse_text_direction)
-aegisub.register_macro("أدوات/05 - تصحيح نقاط آخر السطر", "تصحيح نقاط آخر السطر", fix_punctuation)
-aegisub.register_macro("أدوات/04 - تغيير شكل الكلمات العربية", "تغيير شكل الكلمات العربية", add_ar_reshape_to_words)
-aegisub.register_macro("أدوات/03 - ترجمة متعددة", "ترجمة متعددة", translate_with_external_script)
-aegisub.register_macro("أدوات/02 - المُشكل", "المُشكل", correct_words)
-aegisub.register_macro("أدوات/01 - تعديل النصوص", "تعديل النصوص", edit_selected_text)
+aegisub.register_macro(": أدوات :/12 - حساب نسبة التقدم", "حساب نسبة التقدم :", calculate_progress)
+aegisub.register_macro(": أدوات :/11 - حذف ما بين الكلمات", "حذف ما بين الكلمات :", remove_text_between_characters)
+aegisub.register_macro(": أدوات :/10 - أداة الحذف", "أداة الحذف :", remove_tool)
+aegisub.register_macro(": أدوات :/09 - تقسيم السطر إلى فريمات", "تقسيم السطر إلى فريمات :", split_line_to_frames)
+aegisub.register_macro(": أدوات :/08 - تغيير موضع الكليب", "تغيير موضع الكليب :", adjust_clips)
+aegisub.register_macro(": أدوات :/07 - تغيير اتجاه النص", "تغيير اتجاه النص :", reverse_text_direction)
+aegisub.register_macro(": أدوات :/06 - تصحيح نقاط آخر السطر", "تصحيح نقاط آخر السطر :", fix_punctuation_unicode)
+aegisub.register_macro(": أدوات :/05 - تصحيح موضع العلامات والنقاط", "تصحيح موضع العلامات والنقاط :", fix_punctuation)
+aegisub.register_macro(": أدوات :/04 - تغيير شكل الكلمات العربية", "تغيير شكل الكلمات العربية :", add_ar_reshape_to_words)
+aegisub.register_macro(": أدوات :/03 - ترجمة متعددة", "ترجمة متعددة :", translate_with_external_script)
+aegisub.register_macro(": أدوات :/02 - المُشكل", "المُشكل :", correct_words)
+aegisub.register_macro(": أدوات :/01 - تعديل النصوص", "تعديل النصوص :", edit_selected_text)
