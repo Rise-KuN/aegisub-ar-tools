@@ -1,7 +1,7 @@
 # AR Spell Check
 
 - AR Spell Check - spellcheck the selected lines `Arabic only`.
-- If mispelled word detected we add a marker `تحتاج مراجعة` to the line.
+- If misspelled word detected we add a marker `تحتاج مراجعة` to the line.
 
 ## Requirements
 
