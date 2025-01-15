@@ -1,7 +1,7 @@
 script_name = "أدوات"
 script_description = "أدوات متعددة الاستخدام"
 script_author = "Rise-KuN"
-script_version = "1.4.7"
+script_version = "1.4.8"
 
 include("unicode.lua")
 local json = require 'json'
@@ -68,7 +68,7 @@ function fix_punctuation(subtitles, selected_lines, active_line)
         "!", ":", "؛", "،", "%.", "%.%.%.", "%-", "%_", "%$", "%@", "«", "»", '"', "%[", "%]"
     }
     
-    local pattern = "([" .. table.concat(punctuation, "") .. "]+)(%s*)$"
+    local pattern = "([%p]+)(%s*)$"
 
     for _, line_index in ipairs(selected_lines) do
         local line = subtitles[line_index]
