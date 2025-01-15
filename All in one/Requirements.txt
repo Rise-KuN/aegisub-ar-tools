@@ -8,3 +8,4 @@ sacremoses
 sentencepiece
 arabic-reshaper
 python-bidi
+pyspellchecker
