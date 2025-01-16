@@ -10,17 +10,19 @@ from dotenv import load_dotenv
 from transformers import MarianTokenizer, MarianMTModel
 
 load_dotenv()
-
 HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
 headers = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
 
-appdatapath = '%APPDATA%\\Aegisub\\adawet\\translate'
-if '%' in appdatapath:
-    appdatapath = path.expandvars(appdatapath)
-
+# Paths
+appdatapath = os.getenv('APPDATA') + "\\Aegisub\\adawet\\translate"
 input_path = path.join(appdatapath, "translation_input.json")
 output_path = path.join(appdatapath, "translation_output.json")
-error_log_path = path.join(os.path.dirname(__file__), "error_log.txt")
+error_log_path = os.path.join(os.path.dirname(__file__), "error_log.txt")
+
+# Log errors to a file
+def log_error(message):
+    with open(error_log_path, "a", encoding="utf-8") as error_file:
+        error_file.write(message + "\n")
 
 def translate_text(text, model, tokenizer):
     try:
@@ -29,7 +31,7 @@ def translate_text(text, model, tokenizer):
         translated_text = tokenizer.batch_decode(translated, skip_special_tokens=True)[0]
         return translated_text
     except Exception as e:
-        print(f"An error occurred: {str(e)}")
+        log_error(f"An error occurred: {str(e)}")
         return None
 
 if __name__ == "__main__":
@@ -52,6 +54,4 @@ if __name__ == "__main__":
             json.dump(translations, file)
 
     except Exception as e:
-        with open(error_log_path, "w", encoding="utf-8") as error_file:
-            error_file.write(str(e))
-        print(f"An error occurred: {e}")
+        log_error(f"Error: {e}")
