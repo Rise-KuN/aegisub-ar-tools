@@ -1483,9 +1483,10 @@ function spellchecker(subtitles, selected_lines, active_line)
     -- Show first dialog to select version (based on saved config)
     local version = config.version_1 and "الأولى" or "الثانية"
     local sp_first_dialog = {
-        {class="label", label=":اختر النسخة", x=1, y=1, width=2, height=1},
-        {class="dropdown", name="version", items={"الأولى", "الثانية"}, value=version, x=0, y=2, width=1, height=1}
+        {class="label", label=":اختر النسخة", x=1, y=0, width=2, height=1},
+        {class="dropdown", name="version", items={"الأولى", "الثانية"}, value=version, x=0, y=0, width=1, height=1}
     }
+
     local button, sp_result = aegisub.dialog.display(sp_first_dialog, {"التالي", "إلغاء", "مسار الأداة"})
 
     -- If "مسار الأداة" is clicked, let the user select the Python file
