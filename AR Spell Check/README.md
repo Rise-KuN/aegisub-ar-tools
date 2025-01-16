@@ -17,5 +17,5 @@ Or Do It Manual via command prompt `cmd`:
 
 Press `Win + R`, Then type `cmd`, And hit Enter
 ```
-pip install requests pyspellchecker
+pip install requests python-dotenv pyspellchecker
 ```
