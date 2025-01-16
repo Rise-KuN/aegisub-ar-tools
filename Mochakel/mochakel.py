@@ -23,6 +23,11 @@ commit_url = "https://api.github.com/repos/Rise-KuN/aegisub-ar-tools/commits?pat
 # Ensure the app data path exists
 os.makedirs(appdatapath, exist_ok=True)
 
+# Log errors to a file
+def log_error(message):
+    with open(error_log_path, "a", encoding="utf-8") as error_file:
+        error_file.write(message + "\n")
+
 def fetch_latest_commit_hash():
     try:
         response = requests.get(commit_url)
@@ -125,6 +130,4 @@ if __name__ == "__main__":
             json.dump(corrected_texts, file, ensure_ascii=False, indent=4)
 
     except Exception as e:
-        with open(error_log_path, "a", encoding="utf-8") as error_file:
-            error_file.write(str(e) + "\n")
-        print(f"An error occurred: {e}")
+        log_error(f"Error: {e}")
