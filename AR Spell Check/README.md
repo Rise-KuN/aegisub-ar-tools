@@ -17,5 +17,5 @@ Or Do It Manual via command prompt `cmd`:
 
 Press `Win + R`, Then type `cmd`, And hit Enter
 ```
-pip install pyspellchecker
+pip install requests pyspellchecker
 ```
