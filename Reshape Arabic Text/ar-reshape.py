@@ -17,6 +17,11 @@ error_log_path = os.path.join(os.path.dirname(__file__), "error_log.txt")
 # Ensure the app data path exists
 os.makedirs(appdatapath, exist_ok=True)
 
+# Log errors to a file
+def log_error(message):
+    with open(error_log_path, "a", encoding="utf-8") as error_file:
+        error_file.write(message + "\n")
+
 # Configuration for Arabic Reshaper
 configuration = {
     'delete_harakat': False,
@@ -53,6 +58,4 @@ if __name__ == "__main__":
     try:
         process_input()
     except Exception as e:
-        with open(error_log_path, "a", encoding="utf-8") as error_file:
-            error_file.write(str(e) + "\n")
-        print(f"An error occurred: {e}")
+        log_error(f"Error: {e}")
