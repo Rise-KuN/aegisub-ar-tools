@@ -16,7 +16,7 @@ Aegisub Has many tools as we know but not for Arab Fansubbers, So we created the
 - Remove STR - Remove `.` `!` `\N` from the selected lines.
 - Remove Text Between `Characters` or `Words`.
 - Add Blur - Add blur to selected lines based on `start` and `end` values with calculation.
-- Retime Line - Shift time of selected lines based on `first line time` with Edit Times Option.
+- Retime Lines - Shift time of selected lines based on `first line time` with Edit Times Option.
 - Calculate Progress - Based on the number of `current line, all lines`.
 
 > [!NOTE]
