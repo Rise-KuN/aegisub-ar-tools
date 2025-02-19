@@ -15,6 +15,7 @@ Aegisub Has many tools as we know but not for Arab Fansubbers, So we created the
 - Split Line To Frames - Split The line to frames based on `start_time`, `end_time`, and `fps`.
 - Remove STR - Remove `.` `!` `\N` from the selected lines.
 - Remove Text Between `Characters` or `Words`.
+- Add Blur - Add blur to selected lines based on `start` and `end` values with calculation.
 - Calculate Progress - Based on the number of `current line, all lines`.
 
 > [!NOTE]
