@@ -1,6 +1,6 @@
 # Retime Lines
 
-- Retime Line: Shift time of selected lines based on `first line time` then shift forward based on the `video player current time` with Edit Times Option.
+- Retime Lines: Shift time of selected lines based on `first line time` then shift forward based on the `video player current time` with Edit Times Option.
 
 - Edit Times Option: add or subtract time from the start time.
 
