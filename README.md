@@ -12,6 +12,7 @@ Aegisub Has many tools as we know but not for Arab Fansubbers, So we created the
 - Fix Punctuation V2 - fix the `.` `!` `،` `:` `؛` `...` + more and makes them at the end of the line In `RTL`.
 - Reverse Text - Reverses the direction of `Words` or `Characters` from the selected lines.
 - Adjust Clip Positions - Change the positions of the `clip` or `iclip` from `LTR` to `RLT` or the opposite.
+- Copy & Paste Clip - Copy the selected lines `clip` or `iclip` and paste it to another selected lines.
 - Split Line To Frames - Split The line to frames based on `start_time`, `end_time`, and `fps`.
 - Remove STR - Remove `.` `!` `\N` from the selected lines.
 - Remove Text Between `Characters` or `Words`.
