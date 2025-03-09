@@ -1,7 +1,7 @@
 script_name = "أدوات"
 script_description = "أدوات متعددة الاستخدام"
 script_author = "Rise-KuN"
-script_version = "1.5.3"
+script_version = "1.5.4"
 
 include("unicode.lua")
 local json = require 'json'
@@ -1856,12 +1856,86 @@ function retime_lines(subtitles, selected_lines, active_line)
     end
 end
 
-aegisub.register_macro(": أدوات :/15 - حساب نسبة التقدم", "حساب نسبة التقدم :", calculate_progress)
-aegisub.register_macro(": أدوات :/14 - تعديل التوقيت", "تعديل التوقيت :", retime_lines)
-aegisub.register_macro(": أدوات :/13 - إضافة بلر للتترات", "إضافة بلر للتترات :", add_blur_to_selected_lines)
-aegisub.register_macro(": أدوات :/12 - حذف ما بين الكلمات", "حذف ما بين الكلمات :", remove_text_between_characters)
-aegisub.register_macro(": أدوات :/11 - أداة الحذف", "أداة الحذف :", remove_tool)
-aegisub.register_macro(": أدوات :/10 - تقسيم السطر إلى فريمات", "تقسيم السطر إلى فريمات :", split_line_to_frames)
+-- أداة نسخ ولصق الكليب
+local clipboard_clips = {}
+
+-- Extract the clip or iclip tag from a line
+function extract_clip_tag(text)
+    return text:match("\\i?clip%([^%)]+%)")
+end
+
+-- Remove the clip or iclip tag from a line
+function remove_clip_tag(text)
+    return text:gsub("\\i?clip%([^%)]+%)", "")
+end
+
+-- Copy the clip or iclip tag from selected lines
+function copy_clip(subs, sel)
+    -- Clear previous clipboard clips
+    clipboard_clips = {}
+
+    for _, i in ipairs(sel) do
+        local line = subs[i]
+        local clip_tag = extract_clip_tag(line.text)
+        if clip_tag then
+            table.insert(clipboard_clips, clip_tag)
+        end
+    end
+    aegisub.debug.out(string.format("Copied %d clip tags\n", #clipboard_clips))
+end
+
+-- Paste the clip or iclip tag at the end of the formatting tag in the selected lines
+function paste_clip(subs, sel)
+    if #clipboard_clips == 0 then
+        aegisub.debug.out("No clip tags copied!!!\n")
+        return
+    end
+
+    local clip_index = 1
+    for _, i in ipairs(sel) do
+        local line = subs[i]
+        local clip_tag = clipboard_clips[clip_index]
+        line.text = remove_clip_tag(line.text)  -- Remove any existing clip or iclip tag
+        
+        -- Check if the line has a tag {} and if so append the clip tag inside the tag
+        local start_idx, end_idx = line.text:find("{[^}]*}")
+        if start_idx and end_idx then
+            -- Insert the clip tag before the closing brace
+            line.text = line.text:sub(1, end_idx - 1) .. clip_tag .. line.text:sub(end_idx)
+        else
+            -- If no tag exists, create one with the clip tag
+            line.text = "{" .. clip_tag .. "}" .. line.text
+        end
+        
+        subs[i] = line
+        -- Loop through copied clips if fewer than selected lines
+        clip_index = clip_index % #clipboard_clips + 1
+    end
+    aegisub.debug.out(string.format("Pasted clip tags to %d lines\n", #sel))
+end
+
+-- Copy & Paste Clip dialog pop-up
+function copy_paste_clip(subs, sel)
+    local buttons = {"نسخ", "لصق", "إلغاء"}
+    local config = {
+        {class="label", label="يمكنك نسخ الكليب من تترات متعددة ولصقها في تترات أخرى، لكن يجب أن يكون عدد التترات نفسه", x=0, y=0, width=2, height=1},
+    }
+    local pressed, _ = aegisub.dialog.display(config, buttons)
+    
+    if pressed == "نسخ" then
+        copy_clip(subs, sel)
+    elseif pressed == "لصق" then
+        paste_clip(subs, sel)
+    end
+end
+
+aegisub.register_macro(": أدوات :/16 - حساب نسبة التقدم", "حساب نسبة التقدم :", calculate_progress)
+aegisub.register_macro(": أدوات :/15 - تعديل التوقيت", "تعديل التوقيت :", retime_lines)
+aegisub.register_macro(": أدوات :/14 - إضافة بلر للتترات", "إضافة بلر للتترات :", add_blur_to_selected_lines)
+aegisub.register_macro(": أدوات :/13 - حذف ما بين الكلمات", "حذف ما بين الكلمات :", remove_text_between_characters)
+aegisub.register_macro(": أدوات :/12 - أداة الحذف", "أداة الحذف :", remove_tool)
+aegisub.register_macro(": أدوات :/11 - تقسيم السطر إلى فريمات", "تقسيم السطر إلى فريمات :", split_line_to_frames)
+aegisub.register_macro(": أدوات :/10 - نسخ ولصق الكليب", "نسخ ولصق الكليب :", copy_paste_clip)
 aegisub.register_macro(": أدوات :/09 - تغيير موضع الكليب", "تغيير موضع الكليب :", adjust_clips)
 aegisub.register_macro(": أدوات :/08 - تغيير اتجاه النص", "تغيير اتجاه النص :", reverse_text_direction)
 aegisub.register_macro(": أدوات :/07 - تصحيح نقاط آخر السطر", "تصحيح نقاط آخر السطر :", fix_punctuation_unicode)
