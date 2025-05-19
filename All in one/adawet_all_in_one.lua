@@ -1,7 +1,7 @@
 script_name = "أدوات"
 script_description = "أدوات متعددة الاستخدام"
 script_author = "Rise-KuN"
-script_version = "1.5.5"
+script_version = "1.5.6"
 
 include("unicode.lua")
 local json = require 'json'
@@ -68,7 +68,7 @@ function fix_punctuation(subtitles, selected_lines, active_line)
         "!", ":", "؛", "،", "%.", "%.%.%.", "%-", "%_", "%$", "%@", "«", "»", '"', "%[", "%]"
     }
 
-    local pattern = "([%p]+)(%s*)$"
+    local pattern = "([،؛:!%.%-%_%$%@%[%]\"«»]+)(%s*)$"
 
     for _, line_index in ipairs(selected_lines) do
         local line = subtitles[line_index]
@@ -1748,8 +1748,8 @@ function ms_to_time(ms)
     return string.format("%01d:%02d:%02d.%03d", h, m, s, ms)
 end
 
--- Function to Shift Times based on the vplayer current time
-function shift_times(subtitles, selected_lines, active_line)
+-- Function to retime lines based on the vplayer current time
+function retime_lines(subtitles, selected_lines, active_line)
     -- Get the player's current time
     local player_time = aegisub.ms_from_frame(aegisub.project_properties().video_position)
 
@@ -1761,12 +1761,12 @@ function shift_times(subtitles, selected_lines, active_line)
     aegisub.debug.out(string.format("First Line Start Time: %s\n", ms_to_time(first_line_start)))
     aegisub.debug.out(string.format("Player Time: %s\n", ms_to_time(player_time)))
 
-    -- Shift Times Config (default to False)
+    -- Edit Time Config (default to False)
     local edit_times_config = {"True", "False"}
 	
 	-- Dialogs
     local dialog = {
-        -- Shift Times Option
+        -- Edit Time Option
         {class="label", label=":تعديل التوقيت", x=50, y=1, width=2, height=1},
         {class="dropdown", name="edit_times", items=edit_times_config, value=edit_times_config[2], x=0, y=1, width=50, height=1},
         
@@ -1858,11 +1858,11 @@ function shift_times(subtitles, selected_lines, active_line)
 end
 
 -- Function to edit the start/end timing of selected lines
-function edit_times(subtitles, selected_lines, active_line)
+function edit_line_timing(subtitles, selected_lines, active_line)
     local edit_times_config = {"للأمام", "للخلف"}
     
     local dialog = {
-        -- Shift Times Direction (Increase/Decrease)
+        -- Edit Time Direction (Increase/Decrease)
         {class="label", label=":اتجاه التعديل", x=50, y=1, width=2, height=1},
         {class="dropdown", name="edit_direction", items=edit_times_config, value=edit_times_config[1], x=0, y=1, width=50, height=1},
         
@@ -2000,8 +2000,8 @@ function copy_paste_clip(subs, sel)
 end
 
 aegisub.register_macro(": أدوات :/17 - حساب نسبة التقدم", "حساب نسبة التقدم :", calculate_progress)
-aegisub.register_macro(": أدوات :/16 - تعديل توقيت", "تعديل التوقيت :", edit_times)
-aegisub.register_macro(": أدوات :/15 - تحريك التوقيت", "تحريك التوقيت :", shift_times)
+aegisub.register_macro(": أدوات :/16 - تعديل توقيت التترات", "تعديل التوقيت التترات :", edit_line_timing)
+aegisub.register_macro(": أدوات :/15 - تعديل التوقيت", "تعديل التوقيت :", retime_lines)
 aegisub.register_macro(": أدوات :/14 - إضافة بلر للتترات", "إضافة بلر للتترات :", add_blur_to_selected_lines)
 aegisub.register_macro(": أدوات :/13 - حذف ما بين الكلمات", "حذف ما بين الكلمات :", remove_text_between_characters)
 aegisub.register_macro(": أدوات :/12 - أداة الحذف", "أداة الحذف :", remove_tool)
