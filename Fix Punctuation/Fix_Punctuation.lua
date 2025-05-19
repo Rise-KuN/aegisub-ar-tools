@@ -1,7 +1,7 @@
 script_name = "تصحيح موضع العلامات والنقاط"
 script_description = "Fix Punctuation For RTL languages"
 script_author = "Rise-KuN"
-script_version = "2.0.1"
+script_version = "2.0.2"
 
 -- تصحيح موضع العلامات والنقاط
 function fix_punctuation(subtitles, selected_lines, active_line)
@@ -9,8 +9,8 @@ function fix_punctuation(subtitles, selected_lines, active_line)
     local punctuation = {
         "!", ":", "؛", "،", "%.", "%.%.%.", "%-", "%_", "%$", "%@", "«", "»", '"', "%[", "%]"
     }
-    
-    local pattern = "([%p]+)(%s*)$"
+
+    local pattern = "([،؛:!%.%-%_%$%@%[%]\"«»]+)(%s*)$"
 
     for _, line_index in ipairs(selected_lines) do
         local line = subtitles[line_index]
