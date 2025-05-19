@@ -1,7 +1,7 @@
-script_name = "Retime Lines"
+script_name = "Shift Times"
 script_description = "Shift time of selected lines based on first line time then shift forward based on the video player current time."
 script_author = "Rise-KuN"
-script_version = "1.0.0"
+script_version = "1.0.1"
 
 -- Function to convert time string (0:00:00.00) to milliseconds
 function time_to_ms(time_str)
@@ -20,7 +20,8 @@ function ms_to_time(ms)
     return string.format("%01d:%02d:%02d.%03d", h, m, s, ms)
 end
 
-function retime_lines(subtitles, selected_lines, active_line)
+-- Function to Shift Times based on the vplayer current time
+function shift_times(subtitles, selected_lines, active_line)
     -- Get the player's current time
     local player_time = aegisub.ms_from_frame(aegisub.project_properties().video_position)
 
@@ -32,12 +33,12 @@ function retime_lines(subtitles, selected_lines, active_line)
     aegisub.debug.out(string.format("First Line Start Time: %s\n", ms_to_time(first_line_start)))
     aegisub.debug.out(string.format("Player Time: %s\n", ms_to_time(player_time)))
 
-    -- Edit Time Config (default to False)
+    -- Shift Times Config (default to False)
     local edit_times_config = {"True", "False"}
 	
 	-- Dialogs
     local dialog = {
-        -- Edit Time Option
+        -- Shift Times Option
         {class="label", label=":تعديل التوقيت", x=50, y=1, width=2, height=1},
         {class="dropdown", name="edit_times", items=edit_times_config, value=edit_times_config[2], x=0, y=1, width=50, height=1},
         
@@ -128,4 +129,4 @@ function retime_lines(subtitles, selected_lines, active_line)
     end
 end
 
-aegisub.register_macro(script_name, script_description, retime_lines)
+aegisub.register_macro(script_name, script_description, shift_times)
