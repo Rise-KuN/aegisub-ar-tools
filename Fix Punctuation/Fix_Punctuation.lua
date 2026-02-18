@@ -1,32 +1,92 @@
 script_name = "تصحيح موضع العلامات والنقاط"
 script_description = "Fix Punctuation For RTL languages"
 script_author = "Rise-KuN"
-script_version = "2.0.3"
+script_version = "2.0.4"
 
 -- تصحيح موضع العلامات والنقاط
 function fix_punctuation(subtitles, selected_lines, active_line)
-    -- Punctuation marks List
-    local punctuation = {
-        "!", ":", "؛", "،", "%.", "%.%.%.", "%-", "%_", "%$", "%@", "«", "»", '"', "%[", "%]"
+
+    -- Punctuation characters allowed to move
+    local punctuation_chars = {
+        ["!"] = true,
+        ["؟"] = true,
+        ["."] = true,
+        [":"] = true,
+        ["؛"] = true,
+        ["،"] = true,
+        ["-"] = true,
+        ["_"] = true,
+        ["$"] = true,
+        ["@"] = true,
+        ["«"] = true,
+        ["»"] = true,
+        ['"'] = true,
+        ["["] = true,
+        ["]"] = true,
     }
 
-    local pattern = "([،؛:!%.%-%_%$%@%[%]\"«»]+)(%s*)$"
+    -- UTF-8 safe function to split a string into characters
+    local function utf8_chars(str)
+        local chars = {}
+        local i = 1
+        local len = #str
+        while i <= len do
+            local c = str:byte(i)
+            local char_len = 1
+            if c >= 0xF0 then
+                char_len = 4
+            elseif c >= 0xE0 then
+                char_len = 3
+            elseif c >= 0xC0 then
+                char_len = 2
+            end
+            table.insert(chars, str:sub(i, i+char_len-1))
+            i = i + char_len
+        end
+        return chars
+    end
+
+    -- Move trailing punctuation safely (UTF-8 aware)
+    local function move_punctuation_utf8(segment, punctuation_count_ref)
+        if segment == "" then return segment end
+
+        local chars = utf8_chars(segment)
+        local collected = {}
+
+        -- Walk backwards through real UTF-8 characters
+        for i = #chars, 1, -1 do
+            local ch = chars[i]
+
+            if punctuation_chars[ch] then
+                table.insert(collected, 1, ch)
+                table.remove(chars, i)
+                punctuation_count_ref.count = punctuation_count_ref.count + 1
+            else
+                break
+            end
+        end
+
+        if #collected > 0 then
+            return table.concat(collected) .. table.concat(chars)
+        end
+
+        return segment
+    end
 
     for _, line_index in ipairs(selected_lines) do
         local line = subtitles[line_index]
         local original_text = line.text
         local text = original_text
-        local punctuation_count = 0
 
-        -- Create a list to store parts of the line (text and tags)
+        local punctuation_count_ref = { count = 0 }
         local parts = {}
-        local tag_parts = {}
 
-        -- Split the line into text and tags preserving the structure
+        -- Split text and tags while preserving structure
         local function split_text_and_tags(text)
             local i = 1
             while i <= #text do
                 local char = text:sub(i, i)
+
                 if char == "{" then
                     local tag = text:match("{[^}]*}", i)
                     if tag then
@@ -39,12 +99,10 @@ function fix_punctuation(subtitles, selected_lines, active_line)
                 else
                     local next_tag = text:find("{", i, true)
                     if next_tag then
-                        local non_tag = text:sub(i, next_tag - 1)
-                        table.insert(parts, non_tag)
+                        table.insert(parts, text:sub(i, next_tag - 1))
                         i = next_tag
                     else
-                        local non_tag = text:sub(i)
-                        table.insert(parts, non_tag)
+                        table.insert(parts, text:sub(i))
                         break
                     end
                 end
@@ -52,85 +110,50 @@ function fix_punctuation(subtitles, selected_lines, active_line)
         end
         split_text_and_tags(text)
 
-        -- Remove spaces between \N
-        local function clean_up_n_space(parts)
-            for i, part in ipairs(parts) do
-                -- Remove leading and trailing spaces around \N
-                parts[i] = part:gsub("%s*\\N%s*", "\\N")
-            end
+        -- Remove spaces around \N
+        for i, part in ipairs(parts) do
+            parts[i] = part:gsub("%s*\\N%s*", "\\N")
         end
-        clean_up_n_space(parts)
 
-        -- Handle the text parts
-        local function process_with_punctuation(parts)
-            -- Split the text to parts based on \N
-            local segments = {}
+        -- Process parts safely
+        for i, part in ipairs(parts) do
+            -- Skip tags
+            if not part:match("^{.*}$") then
 
-            for _, part in ipairs(parts) do
-                -- Only process the part if its not a tag
-                if not part:match("^{.*}$") then
+                -- Split safely by literal \N
+                local sub_parts = {}
+                local start = 1
 
-                    -- Split by literal \N safely (DO NOT USE gmatch "[^\\N]+")
-                    local sub_parts = {}
-                    local start = 1
-
-                    while true do
-                        local s, e = part:find("\\N", start, true)
-                        if not s then
-                            table.insert(sub_parts, part:sub(start))
-                            break
-                        end
-                        table.insert(sub_parts, part:sub(start, s - 1))
-                        table.insert(sub_parts, "\\N")
-                        start = e + 1
+                while true do
+                    local s, e = part:find("\\N", start, true)
+                    if not s then
+                        table.insert(sub_parts, part:sub(start))
+                        break
                     end
-
-                    -- Process each sub_part and move punctuations from the end to the start
-                    for i = 1, #sub_parts do
-                        local sub_part = sub_parts[i]
-
-                        -- Skip the \N separator itself
-                        if sub_part ~= "\\N" then
-                            local punc_at_end = sub_part:match(pattern)
-                            if punc_at_end then
-                                punctuation_count = punctuation_count + 1
-
-                                local cleaned = sub_part:gsub(pattern, "")
-                                -- Safety: never allow full deletion
-                                if cleaned ~= "" then
-                                    sub_part = punc_at_end .. cleaned
-                                end
-
-                                sub_parts[i] = sub_part
-                            end
-                        end
-                    end
-
-                    -- Rejoin the sub_parts and add the processed segment
-                    local new_segment = table.concat(sub_parts)
-                    table.insert(segments, new_segment)
-                else
-                    -- If it's a tag add it without modification
-                    table.insert(segments, part)
+                    table.insert(sub_parts, part:sub(start, s - 1))
+                    table.insert(sub_parts, "\\N")
+                    start = e + 1
                 end
-            end
 
-            return segments
+                -- Process each text segment
+                for j = 1, #sub_parts do
+                    if sub_parts[j] ~= "\\N" then
+                        sub_parts[j] = move_punctuation_utf8(sub_parts[j], punctuation_count_ref)
+                    end
+                end
+
+                parts[i] = table.concat(sub_parts)
+            end
         end
 
-        -- Process punctuation handling
-        parts = process_with_punctuation(parts)
-
-        -- Rebuild the text from the processed parts
         text = table.concat(parts)
 
-        -- Debugging
-        --aegisub.debug.out("Line: " .. line_index .. "\n")
-        --aegisub.debug.out("Original Text: " .. original_text .. "\n")
-        --aegisub.debug.out("Modified Text: " .. text .. "\n")
-        --aegisub.debug.out("Punctuation Detected: " .. punctuation_count .. "\n\n")
+        -- Debugging output
+        aegisub.debug.out("Line: " .. line_index .. "\n")
+        aegisub.debug.out("Original Text: " .. original_text .. "\n")
+        aegisub.debug.out("Modified Text: " .. text .. "\n")
+        aegisub.debug.out("Punctuation Detected: " .. punctuation_count_ref.count .. "\n\n")
 
-        -- Update the line text
         line.text = text
         subtitles[line_index] = line
     end
