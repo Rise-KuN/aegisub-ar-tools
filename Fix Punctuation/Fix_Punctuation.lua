@@ -1,7 +1,7 @@
 script_name = "تصحيح موضع العلامات والنقاط"
 script_description = "Fix Punctuation For RTL languages"
 script_author = "Rise-KuN"
-script_version = "2.0.2"
+script_version = "2.0.3"
 
 -- تصحيح موضع العلامات والنقاط
 function fix_punctuation(subtitles, selected_lines, active_line)
@@ -32,11 +32,21 @@ function fix_punctuation(subtitles, selected_lines, active_line)
                     if tag then
                         table.insert(parts, tag)
                         i = i + #tag
+                    else
+                        table.insert(parts, char)
+                        i = i + 1
                     end
                 else
-                    local non_tag = text:match("([^{]*)", i)
-                    table.insert(parts, non_tag)
-                    i = i + #non_tag
+                    local next_tag = text:find("{", i, true)
+                    if next_tag then
+                        local non_tag = text:sub(i, next_tag - 1)
+                        table.insert(parts, non_tag)
+                        i = next_tag
+                    else
+                        local non_tag = text:sub(i)
+                        table.insert(parts, non_tag)
+                        break
+                    end
                 end
             end
         end
@@ -55,34 +65,56 @@ function fix_punctuation(subtitles, selected_lines, active_line)
         local function process_with_punctuation(parts)
             -- Split the text to parts based on \N
             local segments = {}
+
             for _, part in ipairs(parts) do
                 -- Only process the part if its not a tag
                 if not part:match("^{.*}$") then
-                    -- Split by \N to handle each segment separately
+
+                    -- Split by literal \N safely (DO NOT USE gmatch "[^\\N]+")
                     local sub_parts = {}
-                    for sub_part in part:gmatch("[^\\N]+") do
-                        table.insert(sub_parts, sub_part)
+                    local start = 1
+
+                    while true do
+                        local s, e = part:find("\\N", start, true)
+                        if not s then
+                            table.insert(sub_parts, part:sub(start))
+                            break
+                        end
+                        table.insert(sub_parts, part:sub(start, s - 1))
+                        table.insert(sub_parts, "\\N")
+                        start = e + 1
                     end
 
                     -- Process each sub_part and move punctuations from the end to the start
-                    for i, sub_part in ipairs(sub_parts) do
-                        local punc_at_end = sub_part:match(pattern)
-                        if punc_at_end then
-                            punctuation_count = punctuation_count + 1
-                            sub_part = sub_part:gsub(pattern, "")
-                            sub_part = punc_at_end .. sub_part
-                            sub_parts[i] = sub_part
+                    for i = 1, #sub_parts do
+                        local sub_part = sub_parts[i]
+
+                        -- Skip the \N separator itself
+                        if sub_part ~= "\\N" then
+                            local punc_at_end = sub_part:match(pattern)
+                            if punc_at_end then
+                                punctuation_count = punctuation_count + 1
+
+                                local cleaned = sub_part:gsub(pattern, "")
+                                -- Safety: never allow full deletion
+                                if cleaned ~= "" then
+                                    sub_part = punc_at_end .. cleaned
+                                end
+
+                                sub_parts[i] = sub_part
+                            end
                         end
                     end
 
                     -- Rejoin the sub_parts and add the processed segment
-                    local new_segment = table.concat(sub_parts, "\\N")
+                    local new_segment = table.concat(sub_parts)
                     table.insert(segments, new_segment)
                 else
                     -- If it's a tag add it without modification
                     table.insert(segments, part)
                 end
             end
+
             return segments
         end
 
