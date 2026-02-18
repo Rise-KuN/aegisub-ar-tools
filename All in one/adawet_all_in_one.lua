@@ -206,10 +206,10 @@ function fix_punctuation(subtitles, selected_lines, active_line)
         text = table.concat(parts)
 
         -- Debugging output
-        aegisub.debug.out("Line: " .. line_index .. "\n")
-        aegisub.debug.out("Original Text: " .. original_text .. "\n")
-        aegisub.debug.out("Modified Text: " .. text .. "\n")
-        aegisub.debug.out("Punctuation Detected: " .. punctuation_count_ref.count .. "\n\n")
+        --aegisub.debug.out("Line: " .. line_index .. "\n")
+        --aegisub.debug.out("Original Text: " .. original_text .. "\n")
+        --aegisub.debug.out("Modified Text: " .. text .. "\n")
+        --aegisub.debug.out("Punctuation Detected: " .. punctuation_count_ref.count .. "\n\n")
 
         line.text = text
         subtitles[line_index] = line
@@ -2070,4 +2070,5 @@ aegisub.register_macro(": أدوات :/04 - تغيير شكل الكلمات ا�
 aegisub.register_macro(": أدوات :/03 - ترجمة متعددة", "ترجمة متعددة :", translate_with_external_script)
 aegisub.register_macro(": أدوات :/02 - المُشكل", "المُشكل :", correct_words)
 aegisub.register_macro(": أدوات :/01 - تعديل النصوص", "تعديل النصوص :", edit_selected_text)
+
 
