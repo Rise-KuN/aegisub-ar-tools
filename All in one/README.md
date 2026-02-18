@@ -5,8 +5,8 @@
 - Translate - Translate From `eng, jp` to `ar, eng`.
 - Reshape AR Text - Reshape the text to make it support gardient characters.
 - AR Spell Check - spellcheck the selected lines `Arabic only`.
-- Fix Punctuation - fix the `. ! ؟` and make them at the end of the line In `RTL`.
-- Fix Punctuation V2 - fix the `.` `!` `،` `:` `؛` `...` + more and makes them at the end of the line In `RTL`.
+- Fix Punctuation Unicode - fix the `.` `!` `،` `:` `؛` `...` and makes them at the end of the line In `RTL` by adding a Unicode character at the begining.
+- Fix Punctuation V2 - fix the `.` `!` `،` `:` `؛` `...` + more and makes them at the end of the line In `RTL` by reversing the punctuation position.
 - Reverse Text - Reverses the direction of `Words` or `Characters` from the selected lines.
 - Adjust Clip Positions - Change the positions of the `clip` or `iclip` from `LTR` to `RLT` or the opposite.
 - Copy & Paste Clip - Copy the selected lines `clip` or `iclip` and paste it to another selected lines.
@@ -14,7 +14,7 @@
 - Remove STR - Remove `.` `!` `\N` from the selected lines.
 - Remove Text Between `Characters` or `Words`.
 - Add Blur - Add blur to selected lines based on `start` and `end` values with calculation.
-- Shift Times - Shift time of selected lines based on `first line time` with Shift Times Option.
+- Shift Times - Shift time of selected lines based on `first line time` then shift forward based on the `video player current time` with Shift Times Option.
 - Edit Times - Edit the selected lines timing by `Increase` or `Decrease` the `start` or `end` times based on the `input` values.
 - Calculate Progress - Based on the number of `current line, all lines`.
 
@@ -37,3 +37,4 @@ Press `Win + R`, Then type `cmd`, And hit Enter
 ```
 pip install requests python-dotenv transformers torch torchvision torchaudio sacremoses sentencepiece arabic-reshaper python-bidi pyspellchecker
 ```
+
