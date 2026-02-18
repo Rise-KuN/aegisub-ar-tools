@@ -9,7 +9,6 @@ function fix_punctuation(subtitles, selected_lines, active_line)
     -- Punctuation characters allowed to move
     local punctuation_chars = {
         ["!"] = true,
-        ["؟"] = true,
         ["."] = true,
         [":"] = true,
         ["؛"] = true,
@@ -149,10 +148,10 @@ function fix_punctuation(subtitles, selected_lines, active_line)
         text = table.concat(parts)
 
         -- Debugging output
-        aegisub.debug.out("Line: " .. line_index .. "\n")
-        aegisub.debug.out("Original Text: " .. original_text .. "\n")
-        aegisub.debug.out("Modified Text: " .. text .. "\n")
-        aegisub.debug.out("Punctuation Detected: " .. punctuation_count_ref.count .. "\n\n")
+        --aegisub.debug.out("Line: " .. line_index .. "\n")
+        --aegisub.debug.out("Original Text: " .. original_text .. "\n")
+        --aegisub.debug.out("Modified Text: " .. text .. "\n")
+        --aegisub.debug.out("Punctuation Detected: " .. punctuation_count_ref.count .. "\n\n")
 
         line.text = text
         subtitles[line_index] = line
