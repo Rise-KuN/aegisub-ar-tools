@@ -1,7 +1,7 @@
 script_name = "أدوات"
 script_description = "أدوات متعددة الاستخدام"
 script_author = "Rise-KuN"
-script_version = "1.5.8"
+script_version = "1.5.9"
 
 include("unicode.lua")
 local json = require 'json'
@@ -2053,22 +2053,344 @@ function copy_paste_clip(subs, sel)
     end
 end
 
-aegisub.register_macro(": أدوات :/17 - حساب نسبة التقدم", "حساب نسبة التقدم :", calculate_progress)
-aegisub.register_macro(": أدوات :/16 - تعديل توقيت التترات", "تعديل التوقيت التترات :", edit_line_timing)
-aegisub.register_macro(": أدوات :/15 - تعديل التوقيت", "تعديل التوقيت :", retime_lines)
-aegisub.register_macro(": أدوات :/14 - إضافة بلر للتترات", "إضافة بلر للتترات :", add_blur_to_selected_lines)
-aegisub.register_macro(": أدوات :/13 - حذف ما بين الكلمات", "حذف ما بين الكلمات :", remove_text_between_characters)
-aegisub.register_macro(": أدوات :/12 - أداة الحذف", "أداة الحذف :", remove_tool)
-aegisub.register_macro(": أدوات :/11 - تقسيم السطر إلى فريمات", "تقسيم السطر إلى فريمات :", split_line_to_frames)
-aegisub.register_macro(": أدوات :/10 - نسخ ولصق الكليب", "نسخ ولصق الكليب :", copy_paste_clip)
-aegisub.register_macro(": أدوات :/09 - تغيير موضع الكليب", "تغيير موضع الكليب :", adjust_clips)
-aegisub.register_macro(": أدوات :/08 - تغيير اتجاه النص", "تغيير اتجاه النص :", reverse_text_direction)
-aegisub.register_macro(": أدوات :/07 - تصحيح نقاط آخر السطر", "تصحيح نقاط آخر السطر :", fix_punctuation_unicode)
-aegisub.register_macro(": أدوات :/06 - تصحيح موضع العلامات والنقاط", "تصحيح موضع العلامات والنقاط :", fix_punctuation)
-aegisub.register_macro(": أدوات :/05 - أداة فحص الأخطاء", "أداة فحص الأخطاء :", spellchecker)
-aegisub.register_macro(": أدوات :/04 - تغيير شكل الكلمات العربية", "تغيير شكل الكلمات العربية :", add_ar_reshape_to_words)
-aegisub.register_macro(": أدوات :/03 - ترجمة متعددة", "ترجمة متعددة :", translate_with_external_script)
-aegisub.register_macro(": أدوات :/02 - المُشكل", "المُشكل :", correct_words)
+-- Extract Tags
+-- Function to convert color values to the format used in tags (e.g., &HBBGGRR&)
+function color_to_tag_format(color_value)
+    if type(color_value) == "string" and color_value ~= "" then
+        -- Colors come in format &HAARRGGBB& where AA is alpha, RRGGBB is BGR
+        -- Extract just the BGR part (last 6 hex digits)
+        -- Remove the &H prefix and & suffix
+        local clean = color_value:gsub("[&H]", ""):gsub("&$", "")
+        
+        if #clean >= 6 then
+            -- Take the last 6 characters (BGR) to remove alpha
+            local bgr = clean:sub(-6)
+            return "&H" .. bgr .. "&"
+        end
+        return color_value
+    elseif type(color_value) == "number" then
+        -- If it's a number, convert to hex
+        local hex_value = string.format("%08X", color_value)
+        local bgr = hex_value:sub(-6)
+        return "&H" .. bgr .. "&"
+    end
+    return "&H000000&"
+end
+
+-- Extract style properties and build override tags
+function extract_style_tags(subtitles, style_name, extract_options)
+    local style = nil
+    
+    -- Find the style in the subtitles
+    for i = 1, #subtitles do
+        if subtitles[i].class == "style" and subtitles[i].name == style_name then
+            style = subtitles[i]
+            break
+        end
+    end
+    
+    if not style then
+        return ""
+    end
+    
+    local tags = ""
+    
+    -- Extract font name
+    if extract_options.font then
+        tags = tags .. "\\fn" .. style.fontname
+    end
+    
+    -- Extract font size
+    if extract_options.size then
+        tags = tags .. "\\fs" .. style.fontsize
+    end
+    
+    -- Extract border
+    if extract_options.bord then
+        tags = tags .. "\\bord" .. style.outline
+    end
+    
+    -- Extract shadow
+    if extract_options.shad then
+        tags = tags .. "\\shad" .. style.shadow
+    end
+    
+    -- Extract color tags
+    if extract_options.color then
+        -- Handle color1 (primary color)
+        local color_val = style.color1
+        tags = tags .. "\\c" .. color_to_tag_format(color_val)
+    end
+    if extract_options.color2 then
+        -- Handle color2 (secondary color)
+        local color_val = style.color2
+        tags = tags .. "\\2c" .. color_to_tag_format(color_val)
+    end
+    if extract_options.color3 then
+        -- Handle color3 (outline color)
+        local color_val = style.color3
+        tags = tags .. "\\3c" .. color_to_tag_format(color_val)
+    end
+    if extract_options.color4 then
+        -- Handle color4 (shadow color)
+        local color_val = style.color4
+        tags = tags .. "\\4c" .. color_to_tag_format(color_val)
+    end
+    
+    return tags
+end
+
+-- Function to remove a tag by name from a tag string
+function remove_tag(tag_string, tag_name)
+    -- Handle special cases for color tags (c, 1c, 2c, 3c, 4c)
+    if tag_name == "c" or tag_name == "1c" then
+        -- Remove both \c and \1c (they're the same) - match \c&H...& or \1c&H...&
+        tag_string = tag_string:gsub("\\1*c&H%x*&", "")
+    elseif tag_name == "2c" or tag_name == "3c" or tag_name == "4c" then
+        -- Remove color tag and its value
+        tag_string = tag_string:gsub("\\" .. tag_name .. "&H%x*&", "")
+    elseif tag_name == "pos" or tag_name == "move" or tag_name == "clip" or tag_name == "iclip" then
+        -- Remove tags with parentheses content
+        tag_string = tag_string:gsub("\\" .. tag_name .. "%([^)]*%)", "")
+    else
+        -- Remove regular tags (fn, fs, bord, shad)
+        tag_string = tag_string:gsub("\\" .. tag_name .. "[^\\}]*", "")
+    end
+    return tag_string
+end
+
+-- Merge extracted tags with existing tags (new tags override old ones)
+function merge_tags_into_block(existing_block_content, new_tags)
+    local result = existing_block_content
+    
+    -- Remove old tags if they're being replaced
+    if new_tags:match("\\c[^\\}]") then result = remove_tag(result, "c") end
+    if new_tags:match("\\2c[^\\}]") then result = remove_tag(result, "2c") end
+    if new_tags:match("\\3c[^\\}]") then result = remove_tag(result, "3c") end
+    if new_tags:match("\\4c[^\\}]") then result = remove_tag(result, "4c") end
+    if new_tags:match("\\bord[^\\}]") then result = remove_tag(result, "bord") end
+    if new_tags:match("\\shad[^\\}]") then result = remove_tag(result, "shad") end
+    if new_tags:match("\\fn[^\\}]") then result = remove_tag(result, "fn") end
+    if new_tags:match("\\fs[^\\}]") then result = remove_tag(result, "fs") end
+    
+    -- Add new tags at the beginning
+    return new_tags .. result
+end
+
+-- Function to inject tags into the first tag block of the text
+function inject_tags_into_text(text, new_tags)
+    -- Find the first tag block {...}
+    local block_start, block_end = text:find("{[^}]*}")
+    
+    if block_start then
+        -- Extract existing block content (without braces)
+        local existing_content = text:sub(block_start + 1, block_end - 1)
+        
+        -- Merge new tags with existing content
+        local merged = merge_tags_into_block(existing_content, new_tags)
+        
+        -- Replace the first block
+        return text:sub(1, block_start - 1) .. "{" .. merged .. "}" .. text:sub(block_end + 1)
+    else
+        -- No existing tag block, create one at the beginning
+        return "{" .. new_tags .. "}" .. text
+    end
+end
+
+-- Build the GUI dialog
+function show_extract_dialog()
+    local dialog_items = {
+        {class="label", label="Select tags to extract from styles:", x=0, y=0, width=40, height=1},
+        {class="checkbox", name="color", label="\\c (Primary Color)", value=false, x=0, y=1, width=20, height=1},
+        {class="checkbox", name="color2", label="\\2c (Secondary Color)", value=false, x=0, y=2, width=20, height=1},
+        {class="checkbox", name="color3", label="\\3c (Outline Color)", value=false, x=0, y=3, width=20, height=1},
+        {class="checkbox", name="color4", label="\\4c (Shadow Color)", value=false, x=0, y=4, width=20, height=1},
+        {class="checkbox", name="bord", label="\\bord (Border)", value=false, x=20, y=1, width=20, height=1},
+        {class="checkbox", name="shad", label="\\shad (Shadow)", value=false, x=20, y=2, width=20, height=1},
+        {class="checkbox", name="font", label="\\fn (Font Name)", value=false, x=20, y=3, width=20, height=1},
+        {class="checkbox", name="size", label="\\fs (Font Size)", value=false, x=20, y=4, width=20, height=1},
+    }
+    
+    local buttons = {"Extract", "Cancel"}
+    local button_pressed, options = aegisub.dialog.display(dialog_items, buttons)
+    
+    if button_pressed == "Extract" then
+        return true, options
+    end
+    return false, nil
+end
+
+function extract_tags(subtitles, selected_lines)
+    -- Show dialog to let user choose which tags to extract
+    local should_extract, options = show_extract_dialog()
+    
+    if not should_extract then
+        return
+    end
+    
+    -- Process each selected line
+    for _, line_index in ipairs(selected_lines) do
+        local line = subtitles[line_index]
+        
+        -- Extract tags from this line's style
+        local style_tags = extract_style_tags(subtitles, line.style, options)
+        
+        -- Inject tags into the text (merge with existing tags)
+        if style_tags ~= "" then
+            line.text = inject_tags_into_text(line.text, style_tags)
+            subtitles[line_index] = line
+        end
+    end
+    
+    aegisub.set_undo_point(script_name)
+end
+
+-- Voxify
+-- Directory for configuration
+function get_voxify_config_path()
+    local appdata = os.getenv("APPDATA")
+    local config_dir = appdata .. "\\Aegisub\\adawet\\Voxify"
+    lfs.mkdir(config_dir)
+    return config_dir .. "\\config.json"
+end
+
+-- Output audio file for Voxify
+function get_voxify_audio_path()
+    local appdata = os.getenv("APPDATA")
+    local config_dir = appdata .. "\\Aegisub\\adawet\\Voxify"
+    lfs.mkdir(config_dir)
+    return config_dir .. "\\audio.wav"
+end
+
+-- Load saved config
+function load_voxify_config()
+    local config_path = get_voxify_config_path()
+    local file = io.open(config_path, "r")
+    if file then
+        local content = file:read("*all")
+        file:close()
+        return json.decode(content) or {}
+    end
+    return {}
+end
+
+-- Save config file path
+function save_voxify_config(config)
+    local config_path = get_voxify_config_path()
+    local file = io.open(config_path, "w")
+    if file then
+        file:write(json.encode(config))
+        file:close()
+    else
+        aegisub.debug.out("Failed to save config file.\n")
+    end
+end
+
+-- Select file for Python script
+function select_voxify_py_file_path()
+    return aegisub.dialog.open("اختر ملف Python", "", "", "*.py", false, true)
+end
+
+-- Clean Temp Files
+local function cleanup_voxify_temp_files()
+    local output_path = get_voxify_audio_path()
+    os.remove(output_path)
+end
+
+-- Save audio and pass to Voxify Webhook
+function save_audio_for_voxify(subtitles, selected_lines, active_line)
+    local config = load_voxify_config()
+
+    local dialog_items = {
+        {class="label", label="", x=1, y=0, width=1, height=1},
+    }
+    local button, _ = aegisub.dialog.display(dialog_items, {"التالي", "إلغاء", "مسار الأداة"})
+
+    if button == "مسار الأداة" then
+        config.file_path = select_voxify_py_file_path()
+        if config.file_path then
+            save_voxify_config(config)
+            aegisub.debug.out("Python script path set to: " .. config.file_path .. "\n")
+        else
+            aegisub.debug.out("No Python file selected.\n")
+            return
+        end
+    elseif button == "التالي" then
+        if not config.file_path or not io.open(config.file_path, "r") then
+            aegisub.debug.out("Python script path is not set or invalid.\n")
+            return
+        end
+    else
+        cleanup_voxify_temp_files() -- Clean up temporary files
+        return
+    end
+
+    if #selected_lines == 0 then
+        aegisub.debug.out("Please select a line with audio.\n")
+        return
+    end
+
+    local line = subtitles[selected_lines[1]]
+    local start_time = line.start_time / 1000
+    local end_time = line.end_time / 1000
+    local audio_file = aegisub.project_properties().audio_file
+    if not audio_file or audio_file == "" then
+        aegisub.debug.out("No audio file loaded in Aegisub.\n")
+        return
+    end
+
+    local output_path = get_voxify_audio_path()
+    cleanup_voxify_temp_files() -- Remove Old Files if exists
+
+    local ffmpeg_command = string.format('ffmpeg -i "%s" -ss %f -t %f -acodec pcm_s16le -ar 44100 "%s" -y',
+        audio_file, start_time, end_time - start_time, output_path)
+    local success = os.execute(ffmpeg_command)
+    if success then
+        aegisub.debug.out("Audio extracted and saved to: " .. output_path .. "\n")
+    else
+        aegisub.debug.out("Failed to extract audio using FFmpeg.\n")
+        return
+    end
+
+    if config.file_path then
+        local command = string.format('python "%s"', config.file_path)
+        os.execute(command)
+        if success then
+            aegisub.debug.out("Python script executed successfully.\n")
+        else
+            aegisub.debug.out("Failed to execute Python script.\n")
+        end
+    else
+        aegisub.debug.out("No Python script path configured.\n")
+    end
+
+    -- Final dialog with close button
+    local final_dialog_items = {
+        {class="label", label="Operation completed.", x=0, y=0, width=1, height=1},
+    }
+    local close_button, _ = aegisub.dialog.display(final_dialog_items, {"إغلاق"})
+    
+    if close_button == "إغلاق" then
+        cleanup_voxify_temp_files() -- Clean up temporary files
+    end
+end
+
+aegisub.register_macro(": أدوات :/19 - استخراج مقطع الصوت", "استخراج مقطع الصوت :", save_audio_for_voxify)
+aegisub.register_macro(": أدوات :/18 - حساب نسبة التقدم", "حساب نسبة التقدم :", calculate_progress)
+aegisub.register_macro(": أدوات :/17 - تعديل توقيت التترات", "تعديل التوقيت التترات :", edit_line_timing)
+aegisub.register_macro(": أدوات :/16 - تعديل التوقيت", "تعديل التوقيت :", retime_lines)
+aegisub.register_macro(": أدوات :/15 - إضافة بلر للتترات", "إضافة بلر للتترات :", add_blur_to_selected_lines)
+aegisub.register_macro(": أدوات :/14 - حذف ما بين الكلمات", "حذف ما بين الكلمات :", remove_text_between_characters)
+aegisub.register_macro(": أدوات :/13 - أداة الحذف", "أداة الحذف :", remove_tool)
+aegisub.register_macro(": أدوات :/12 - تقسيم السطر إلى فريمات", "تقسيم السطر إلى فريمات :", split_line_to_frames)
+aegisub.register_macro(": أدوات :/11 - نسخ ولصق الكليب", "نسخ ولصق الكليب :", copy_paste_clip)
+aegisub.register_macro(": أدوات :/10 - تغيير موضع الكليب", "تغيير موضع الكليب :", adjust_clips)
+aegisub.register_macro(": أدوات :/09 - تغيير اتجاه النص", "تغيير اتجاه النص :", reverse_text_direction)
+aegisub.register_macro(": أدوات :/08 - تصحيح نقاط آخر السطر", "تصحيح نقاط آخر السطر :", fix_punctuation_unicode)
+aegisub.register_macro(": أدوات :/07 - تصحيح موضع العلامات والنقاط", "تصحيح موضع العلامات والنقاط :", fix_punctuation)
+aegisub.register_macro(": أدوات :/06 - أداة فحص الأخطاء", "أداة فحص الأخطاء :", spellchecker)
+aegisub.register_macro(": أدوات :/05 - تغيير شكل الكلمات العربية", "تغيير شكل الكلمات العربية :", add_ar_reshape_to_words)
+aegisub.register_macro(": أدوات :/04 - ترجمة متعددة", "ترجمة متعددة :", translate_with_external_script)
+aegisub.register_macro(": أدوات :/03 - المُشكل", "المُشكل :", correct_words)
+aegisub.register_macro(": أدوات :/02 - استخراج وسوم الأنماط", "استخراج وسوم الأنماط :", extract_tags)
 aegisub.register_macro(": أدوات :/01 - تعديل النصوص", "تعديل النصوص :", edit_selected_text)
-
-
