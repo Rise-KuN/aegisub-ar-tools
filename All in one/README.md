@@ -1,6 +1,7 @@
 # All in one Tools
 
 - Text Editor - Edit the selected lines, also support `RLT` if you hit (right ctrl + right shift).
+- Extract Tags - Extracts style properties from selected lines and injects them as override tags directly into the line.
 - Mochakel - Add Tachkeel To the selected lines `Arabic only`.
 - Translate - Translate From `eng, jp` to `ar, eng`.
 - Reshape AR Text - Reshape the text to make it support gardient characters.
@@ -17,9 +18,10 @@
 - Shift Times - Shift time of selected lines based on `first line time` then shift forward based on the `video player current time` with Shift Times Option.
 - Edit Times - Edit the selected lines timing by `Increase` or `Decrease` the `start` or `end` times based on the `input` values.
 - Calculate Progress - Based on the number of `current line, all lines`.
+- Voxify - An Aegisub macro that integrates with Voxify Discord bot for automated audio transcription.
 
 > [!NOTE]
-> Some tools `CR`, `JPTL`, `Reshape AR Text`, `AR Spell Check`, Require Python 3.9 or above.
+> Some tools `CR`, `JPTL`, `Reshape AR Text`, `AR Spell Check`, `Voxify`, Require Python 3.9 or above.
 
 ## Requirements
 
@@ -37,4 +39,3 @@ Press `Win + R`, Then type `cmd`, And hit Enter
 ```
 pip install requests python-dotenv transformers torch torchvision torchaudio sacremoses sentencepiece arabic-reshaper python-bidi pyspellchecker
 ```
-
