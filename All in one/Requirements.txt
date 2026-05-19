@@ -1,0 +1,11 @@
+requests
+python-dotenv
+transformers
+torch
+torchvision
+torchaudio
+sacremoses
+sentencepiece
+arabic-reshaper
+python-bidi
+pyspellchecker
