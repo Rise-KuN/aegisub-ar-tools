@@ -11,6 +11,7 @@ Aegisub Has many tools as we know but not for Arab Fansubbers, So we created the
 - AR Spell Check - spellcheck the selected lines `Arabic only`.
 - Fix Punctuation Unicode - fix the `.` `!` `،` `:` `؛` `...` and makes them at the end of the line In `RTL` by adding a Unicode character at the begining.
 - Fix Punctuation V2 - fix the `.` `!` `،` `:` `؛` `...` + more and makes them at the end of the line In `RTL` by reversing the punctuation position.
+- Punctuation Position Normalizer - Normalizes punctuation placement from line start to line end.
 - Reverse Text - Reverses the direction of `Words` or `Characters` from the selected lines.
 - Adjust Clip Positions - Change the positions of the `clip` or `iclip` from `LTR` to `RLT` or the opposite.
 - Copy & Paste Clip - Copy the selected lines `clip` or `iclip` and paste it to another selected lines.
