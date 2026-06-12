@@ -12,3 +12,7 @@
 
 > [!NOTE]
 > Fix Punctuation V2 Works For Arabic Text Only and doesn't broke the `Spell Checker`.
+
+# Punctuation Position Normalizer
+
+- Normalizes punctuation placement from line start to line end.
