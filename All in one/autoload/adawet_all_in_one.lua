@@ -1,7 +1,7 @@
 script_name = "أدوات"
 script_description = "أدوات متعددة الاستخدام"
 script_author = "Rise-KuN"
-script_version = "1.6.0"
+script_version = "1.6.1"
 
 include("unicode.lua")
 local json = require 'json'
@@ -61,7 +61,7 @@ function fix_punctuation_unicode(subtitles, selected_lines, active_line)
 	aegisub.set_undo_point("Punctuation fix")
 end
 
--- تصحيح موضع العلامات والنقاط
+-- تصحيح موضع علامات الترقيم
 function fix_punctuation(subtitles, selected_lines, active_line)
 
     -- Punctuation characters allowed to move
@@ -213,6 +213,113 @@ function fix_punctuation(subtitles, selected_lines, active_line)
 
         line.text = text
         subtitles[line_index] = line
+    end
+
+    aegisub.set_undo_point(script_name)
+end
+
+-- Punctuation Position Normalizer
+local normalizer_punctuation = {
+    ["."] = true,
+    ["،"] = true,
+    ["؛"] = true,
+    ["..."] = true,
+    ["!"] = true,
+    [":"] = true,
+    [']'] = true,
+    ['['] = true,
+    ['('] = true,
+    [')'] = true,
+    ['«'] = true,
+    ['»'] = true,
+    ['-'] = true,
+    ['"'] = true,
+    ["—"] = true
+}
+
+-- UTF-8 safe character splitter
+local function normalizer_utf8_chars(str)
+    local chars = {}
+    local i = 1
+
+    while i <= #str do
+        local c = str:byte(i)
+        local len = 1
+
+        if c >= 0xF0 then
+            len = 4
+        elseif c >= 0xE0 then
+            len = 3
+        elseif c >= 0xC0 then
+            len = 2
+        end
+
+        table.insert(chars, str:sub(i, i + len - 1))
+        i = i + len
+    end
+
+    return chars
+end
+
+-- Move punctuation from start to end
+local function fix_line(text)
+    local chars = normalizer_utf8_chars(text)
+
+    local collected = {}
+    local start_index = 1
+
+    -- Collect punctuation from the beginning
+    while start_index <= #chars and normalizer_punctuation[chars[start_index]] do
+        table.insert(collected, chars[start_index])
+        start_index = start_index + 1
+    end
+
+    -- Nothing to fix
+    if #collected == 0 then
+        return text
+    end
+
+    -- Remaining text
+    local remaining = {}
+    for i = start_index, #chars do
+        table.insert(remaining, chars[i])
+    end
+
+    -- Build final line
+    return table.concat(remaining) .. table.concat(collected)
+end
+
+function normalizer_punctuation_position(subtitles, selected_lines, active_line)
+
+    for _, i in ipairs(selected_lines) do
+        local line = subtitles[i]
+
+        -- Split by \N safely
+        local parts = {}
+        local start = 1
+
+        while true do
+            local s, e = line.text:find("\\N", start, true)
+
+            if not s then
+                table.insert(parts, line.text:sub(start))
+                break
+            end
+
+            table.insert(parts, line.text:sub(start, s - 1))
+            table.insert(parts, "\\N")
+            start = e + 1
+        end
+
+        -- Process only text parts
+        for j = 1, #parts do
+            if parts[j] ~= "\\N" then
+                parts[j] = fix_line(parts[j])
+            end
+        end
+
+        line.text = table.concat(parts)
+        subtitles[i] = line
     end
 
     aegisub.set_undo_point(script_name)
@@ -2443,19 +2550,20 @@ function save_audio_for_voxify(subtitles, selected_lines, active_line)
     --end
 end
 
-aegisub.register_macro(": أدوات :/19 - استخراج مقطع الصوت", "استخراج مقطع الصوت :", save_audio_for_voxify)
-aegisub.register_macro(": أدوات :/18 - حساب نسبة التقدم", "حساب نسبة التقدم :", calculate_progress)
-aegisub.register_macro(": أدوات :/17 - تعديل توقيت التترات", "تعديل التوقيت التترات :", edit_line_timing)
-aegisub.register_macro(": أدوات :/16 - تعديل التوقيت", "تعديل التوقيت :", retime_lines)
-aegisub.register_macro(": أدوات :/15 - إضافة بلر للتترات", "إضافة بلر للتترات :", add_blur_to_selected_lines)
-aegisub.register_macro(": أدوات :/14 - حذف ما بين الكلمات", "حذف ما بين الكلمات :", remove_text_between_characters)
-aegisub.register_macro(": أدوات :/13 - أداة الحذف", "أداة الحذف :", remove_tool)
-aegisub.register_macro(": أدوات :/12 - تقسيم السطر إلى فريمات", "تقسيم السطر إلى فريمات :", split_line_to_frames)
-aegisub.register_macro(": أدوات :/11 - نسخ ولصق الكليب", "نسخ ولصق الكليب :", copy_paste_clip)
-aegisub.register_macro(": أدوات :/10 - تغيير موضع الكليب", "تغيير موضع الكليب :", adjust_clips)
-aegisub.register_macro(": أدوات :/09 - تغيير اتجاه النص", "تغيير اتجاه النص :", reverse_text_direction)
-aegisub.register_macro(": أدوات :/08 - تصحيح نقاط آخر السطر", "تصحيح نقاط آخر السطر :", fix_punctuation_unicode)
-aegisub.register_macro(": أدوات :/07 - تصحيح موضع العلامات والنقاط", "تصحيح موضع العلامات والنقاط :", fix_punctuation)
+aegisub.register_macro(": أدوات :/20 - استخراج مقطع الصوت", "استخراج مقطع الصوت :", save_audio_for_voxify)
+aegisub.register_macro(": أدوات :/19 - حساب نسبة التقدم", "حساب نسبة التقدم :", calculate_progress)
+aegisub.register_macro(": أدوات :/18 - تعديل توقيت التترات", "تعديل التوقيت التترات :", edit_line_timing)
+aegisub.register_macro(": أدوات :/17 - تعديل التوقيت", "تعديل التوقيت :", retime_lines)
+aegisub.register_macro(": أدوات :/16 - إضافة بلر للتترات", "إضافة بلر للتترات :", add_blur_to_selected_lines)
+aegisub.register_macro(": أدوات :/15 - حذف ما بين الكلمات", "حذف ما بين الكلمات :", remove_text_between_characters)
+aegisub.register_macro(": أدوات :/14 - أداة الحذف", "أداة الحذف :", remove_tool)
+aegisub.register_macro(": أدوات :/13 - تقسيم السطر إلى فريمات", "تقسيم السطر إلى فريمات :", split_line_to_frames)
+aegisub.register_macro(": أدوات :/12 - نسخ ولصق الكليب", "نسخ ولصق الكليب :", copy_paste_clip)
+aegisub.register_macro(": أدوات :/11 - تغيير موضع الكليب", "تغيير موضع الكليب :", adjust_clips)
+aegisub.register_macro(": أدوات :/10 - تغيير اتجاه النص", "تغيير اتجاه النص :", reverse_text_direction)
+aegisub.register_macro(": أدوات :/09 -  توحيد موضع علامات الترقيم", " توحيد موضع علامات الترقيم :", normalizer_punctuation_position)
+aegisub.register_macro(": أدوات :/08 - تصحيح موضع علامات الترقيم", "تصحيح موضع علامات الترقيم :", fix_punctuation_unicode)
+aegisub.register_macro(": أدوات :/07 - عكس موضع علامات الترقيم", "عكس موضع علامات الترقيم :", fix_punctuation)
 aegisub.register_macro(": أدوات :/06 - أداة فحص الأخطاء", "أداة فحص الأخطاء :", spellchecker)
 aegisub.register_macro(": أدوات :/05 - تغيير شكل الكلمات العربية", "تغيير شكل الكلمات العربية :", add_ar_reshape_to_words)
 aegisub.register_macro(": أدوات :/04 - ترجمة متعددة", "ترجمة متعددة :", translate_with_external_script)
