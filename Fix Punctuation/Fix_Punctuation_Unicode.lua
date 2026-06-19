@@ -1,5 +1,5 @@
 script_name = "تصحيح نقاط آخر السطر"
-script_description = " Adds U+202B unicode character to start of all selected lines, Thus fixing the RTL problem in Aegisub"
+script_description = "Adds U+202B unicode character to start of all selected lines, Thus fixing the RTL problem in Aegisub"
 script_author = "Shinsekai_Yuri"
 script_version = "1.0.0"
 
