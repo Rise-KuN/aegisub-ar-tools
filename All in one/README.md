@@ -6,8 +6,8 @@
 - Translate - Translate From `eng, jp` to `ar, eng`.
 - Reshape AR Text - Reshape the text to make it support gardient characters.
 - AR Spell Check - spellcheck the selected lines `Arabic only`.
-- Fix Punctuation Unicode - fix the `.` `!` `،` `:` `؛` `...` and makes them at the end of the line In `RTL` by adding a Unicode character at the begining.
-- Fix Punctuation V2 - fix the `.` `!` `،` `:` `؛` `...` + more and makes them at the end of the line In `RTL` by reversing the punctuation position.
+- Fix Punctuation Unicode - Adds `U+202B` unicode character to start of all selected lines to fix the `RTL` problem in Aegisub.
+- Fix Punctuation V2 - Reverse the punctuation position to the end of the line In `RTL`.
 - Punctuation Position Normalizer - Normalizes punctuation placement from line start to line end.
 - Reverse Text - Reverses the direction of `Words` or `Characters` from the selected lines.
 - Adjust Clip Positions - Change the positions of the `clip` or `iclip` from `LTR` to `RLT` or the opposite.
@@ -22,7 +22,7 @@
 - Voxify - An Aegisub macro that integrates with Voxify Discord bot for automated audio transcription.
 
 > [!NOTE]
-> Some tools `CR`, `JPTL`, `Reshape AR Text`, `AR Spell Check`, `Voxify`, Require Python 3.9 or above.
+> Some tools `Mochakel`, `JPTL`, `Reshape AR Text`, `AR Spell Check`, `Voxify`, Require Python 3.9 or above.
 
 ## Requirements
 
