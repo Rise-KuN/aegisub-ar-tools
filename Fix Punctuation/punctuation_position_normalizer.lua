@@ -1,7 +1,7 @@
 script_name = "Punctuation Position Normalizer"
 script_description = "Normalizes punctuation placement from line start to line end"
 script_author = "Rise-KuN"
-script_version = "1.0.1"
+script_version = "1.0.2"
 
 -- Punctuation Position Normalizer
 local normalizer_punctuation = {
@@ -20,6 +20,13 @@ local normalizer_punctuation = {
     ['-'] = true,
     ['"'] = true,
     ["—"] = true
+}
+
+local normalizer_enclosing_pairs = {
+    ["("] = ")",
+    ["["] = "]",
+    ["«"] = "»",
+    ["\""] = "\""
 }
 
 -- UTF-8 safe character splitter
@@ -55,15 +62,17 @@ local function fix_line(text)
         return text
     end
 
-    local enclosing_pairs = {
-        ["("] = ")",
-        ["["] = "]",
-        ["«"] = "»",
-        ["\""] = "\""
-    }
-
-    if #chars > 1 and enclosing_pairs[chars[1]] == chars[#chars] then
+    if #chars > 1 and normalizer_enclosing_pairs[chars[1]] == chars[#chars] then
         return text
+    end
+
+    local trailing_dash = false
+    if chars[#chars] == "-" then
+        trailing_dash = true
+        table.remove(chars)
+        while chars[#chars] == " " or chars[#chars] == "\t" do
+            table.remove(chars)
+        end
     end
 
     local collected = {}
@@ -76,7 +85,7 @@ local function fix_line(text)
     end
 
     -- Nothing to fix
-    if #collected == 0 then
+    if #collected == 0 and not trailing_dash then
         return text
     end
 
@@ -87,27 +96,37 @@ local function fix_line(text)
     end
 
     -- Build final line
-    return table.concat(remaining) .. table.concat(collected)
+    return (trailing_dash and "- " or "") .. table.concat(remaining) .. table.concat(collected)
 end
 
 function normalizer_punctuation_position(subtitles, selected_lines, active_line)
 
     for _, i in ipairs(selected_lines) do
         local line = subtitles[i]
+        local text = line.text
+        local line_chars = normalizer_utf8_chars(text)
+        local opening = ""
+        local closing = ""
+
+        if #line_chars > 1 and normalizer_enclosing_pairs[line_chars[1]] == line_chars[#line_chars] then
+            opening = table.remove(line_chars, 1)
+            closing = table.remove(line_chars)
+            text = table.concat(line_chars)
+        end
 
         -- Split by \N safely
         local parts = {}
         local start = 1
 
         while true do
-            local s, e = line.text:find("\\N", start, true)
+            local s, e = text:find("\\N", start, true)
 
             if not s then
-                table.insert(parts, line.text:sub(start))
+                table.insert(parts, text:sub(start))
                 break
             end
 
-            table.insert(parts, line.text:sub(start, s - 1))
+            table.insert(parts, text:sub(start, s - 1))
             table.insert(parts, "\\N")
             start = e + 1
         end
@@ -119,7 +138,7 @@ function normalizer_punctuation_position(subtitles, selected_lines, active_line)
             end
         end
 
-        line.text = table.concat(parts)
+        line.text = opening .. table.concat(parts) .. closing
         subtitles[i] = line
     end
 
