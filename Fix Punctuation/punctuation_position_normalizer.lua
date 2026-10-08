@@ -1,7 +1,7 @@
 script_name = "Punctuation Position Normalizer"
 script_description = "Normalizes punctuation placement from line start to line end"
 script_author = "Rise-KuN"
-script_version = "1.0.0"
+script_version = "1.0.1"
 
 -- Punctuation Position Normalizer
 local normalizer_punctuation = {
@@ -49,6 +49,22 @@ end
 -- Move punctuation from start to end
 local function fix_line(text)
     local chars = normalizer_utf8_chars(text)
+
+    -- Dialogue dashes and enclosing punctuation are not misplaced punctuation.
+    if chars[1] == "-" then
+        return text
+    end
+
+    local enclosing_pairs = {
+        ["("] = ")",
+        ["["] = "]",
+        ["«"] = "»",
+        ["\""] = "\""
+    }
+
+    if #chars > 1 and enclosing_pairs[chars[1]] == chars[#chars] then
+        return text
+    end
 
     local collected = {}
     local start_index = 1
