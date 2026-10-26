@@ -15,6 +15,7 @@ Aegisub Has many tools as we know but not for Arab Fansubbers, So we created the
 - Reverse Text - Reverses the direction of `Words` or `Characters` from the selected lines.
 - Adjust Clip Positions - Change the positions of the `clip` or `iclip` from `LTR` to `RLT` or the opposite.
 - Copy & Paste Clip - Copy the selected lines `clip` or `iclip` and paste it to another selected lines.
+- Copy & Paste Tags - Copy the first override-tag block from selected lines and paste it onto another selection.
 - Split Line To Frames - Split The line to frames based on `start_time`, `end_time`, and `fps`.
 - Remove STR - Remove `.` `!` `\N` from the selected lines.
 - Remove Text Between `Characters` or `Words`.
