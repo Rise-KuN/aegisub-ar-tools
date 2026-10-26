@@ -1,7 +1,7 @@
 script_name = "أدوات"
 script_description = "أدوات متعددة الاستخدام"
 script_author = "Rise-KuN"
-script_version = "1.6.3"
+script_version = "1.6.4"
 
 include("unicode.lua")
 local clipboard = require "clipboard"
@@ -2560,23 +2560,120 @@ function save_audio_for_voxify(subtitles, selected_lines, active_line)
     --end
 end
 
-aegisub.register_macro(": أدوات :/20 - استخراج مقطع الصوت", "استخراج مقطع الصوت :", save_audio_for_voxify)
-aegisub.register_macro(": أدوات :/19 - حساب نسبة التقدم", "حساب نسبة التقدم :", calculate_progress)
-aegisub.register_macro(": أدوات :/18 - تعديل توقيت التترات", "تعديل التوقيت التترات :", edit_line_timing)
-aegisub.register_macro(": أدوات :/17 - تعديل التوقيت", "تعديل التوقيت :", retime_lines)
-aegisub.register_macro(": أدوات :/16 - إضافة بلر للتترات", "إضافة بلر للتترات :", add_blur_to_selected_lines)
-aegisub.register_macro(": أدوات :/15 - حذف ما بين الكلمات", "حذف ما بين الكلمات :", remove_text_between_characters)
-aegisub.register_macro(": أدوات :/14 - أداة الحذف", "أداة الحذف :", remove_tool)
-aegisub.register_macro(": أدوات :/13 - تقسيم السطر إلى فريمات", "تقسيم السطر إلى فريمات :", split_line_to_frames)
-aegisub.register_macro(": أدوات :/12 - نسخ ولصق الكليب", "نسخ ولصق الكليب :", copy_paste_clip)
-aegisub.register_macro(": أدوات :/11 - تغيير موضع الكليب", "تغيير موضع الكليب :", adjust_clips)
-aegisub.register_macro(": أدوات :/10 - تغيير اتجاه النص", "تغيير اتجاه النص :", reverse_text_direction)
-aegisub.register_macro(": أدوات :/09 -  توحيد موضع علامات الترقيم", " توحيد موضع علامات الترقيم :", normalizer_punctuation_position)
-aegisub.register_macro(": أدوات :/08 - تصحيح موضع علامات الترقيم", "تصحيح موضع علامات الترقيم :", fix_punctuation_unicode)
-aegisub.register_macro(": أدوات :/07 - عكس موضع علامات الترقيم", "عكس موضع علامات الترقيم :", fix_punctuation)
-aegisub.register_macro(": أدوات :/06 - أداة فحص الأخطاء", "أداة فحص الأخطاء :", spellchecker)
-aegisub.register_macro(": أدوات :/05 - تغيير شكل الكلمات العربية", "تغيير شكل الكلمات العربية :", add_ar_reshape_to_words)
-aegisub.register_macro(": أدوات :/04 - ترجمة متعددة", "ترجمة متعددة :", translate_with_external_script)
-aegisub.register_macro(": أدوات :/03 - المُشكل", "المُشكل :", correct_words)
+-- Copy and Paste Tags
+function copy_paste_tags(subs, sel)
+    local macro_name = "Copy and Paste Tags"
+    local clipboard = require "clipboard"
+
+    local function show_dialog()
+        local dialog = {
+            {
+                class="dropdown",
+                name="mode",
+                label="Action:",
+                items={"Copy Tags", "Paste Tags"},
+                value="Copy Tags"
+            }
+        }
+
+        local btn, res = aegisub.dialog.display(dialog, {"OK", "Cancel"})
+
+        if btn ~= "OK" then
+            return nil
+        end
+
+        return res.mode
+    end
+
+    local function get_first_tag(text)
+        return text:match("^%s*(%b{})")
+    end
+
+    local function replace_first_tag(text, new_tag)
+        if text:match("^%s*%b{}") then
+            return text:gsub("^(%s*)%b{}", "%1" .. new_tag, 1)
+        else
+            local spaces = text:match("^(%s*)") or ""
+            return spaces .. new_tag .. text:sub(#spaces + 1)
+        end
+    end
+
+    local function copy_tags()
+        local data = {}
+
+        for _, i in ipairs(sel) do
+            local line = subs[i]
+            local tag = get_first_tag(line.text)
+
+            if tag then
+                table.insert(data, tag)
+            else
+                table.insert(data, "{}")
+            end
+        end
+
+        clipboard.set(table.concat(data, "\n"))
+        aegisub.log("Copied tags from %d lines.\n", #data)
+    end
+
+    local function paste_tags()
+        local raw = clipboard.get()
+
+        if not raw or raw == "" then
+            aegisub.cancel("Clipboard doesn't contain copied tags.")
+        end
+
+        local tags = {}
+
+        for tag in raw:gmatch("[^\r\n]+") do
+            table.insert(tags, tag)
+        end
+
+        if #tags ~= #sel then
+            aegisub.cancel(string.format(
+                "Copied %d lines but selected %d.",
+                #tags, #sel
+            ))
+        end
+
+        for n, i in ipairs(sel) do
+            local line = subs[i]
+            line.text = replace_first_tag(line.text, tags[n])
+            subs[i] = line
+        end
+
+        aegisub.set_undo_point(macro_name)
+    end
+
+    local mode = show_dialog()
+
+    if not mode then return end
+
+    if mode == "Copy Tags" then
+        copy_tags()
+    else
+        paste_tags()
+    end
+end
+
+aegisub.register_macro(": أدوات :/21 - استخراج مقطع الصوت", "استخراج مقطع الصوت :", save_audio_for_voxify)
+aegisub.register_macro(": أدوات :/20 - حساب نسبة التقدم", "حساب نسبة التقدم :", calculate_progress)
+aegisub.register_macro(": أدوات :/19 - تعديل توقيت التترات", "تعديل التوقيت التترات :", edit_line_timing)
+aegisub.register_macro(": أدوات :/18 - تعديل التوقيت", "تعديل التوقيت :", retime_lines)
+aegisub.register_macro(": أدوات :/17 - إضافة بلر للتترات", "إضافة بلر للتترات :", add_blur_to_selected_lines)
+aegisub.register_macro(": أدوات :/16 - حذف ما بين الكلمات", "حذف ما بين الكلمات :", remove_text_between_characters)
+aegisub.register_macro(": أدوات :/15 - أداة الحذف", "أداة الحذف :", remove_tool)
+aegisub.register_macro(": أدوات :/14 - تقسيم السطر إلى فريمات", "تقسيم السطر إلى فريمات :", split_line_to_frames)
+aegisub.register_macro(": أدوات :/13 - نسخ ولصق الكليب", "نسخ ولصق الكليب :", copy_paste_clip)
+aegisub.register_macro(": أدوات :/12 - تغيير موضع الكليب", "تغيير موضع الكليب :", adjust_clips)
+aegisub.register_macro(": أدوات :/11 - تغيير اتجاه النص", "تغيير اتجاه النص :", reverse_text_direction)
+aegisub.register_macro(": أدوات :/10 -  توحيد موضع علامات الترقيم", " توحيد موضع علامات الترقيم :", normalizer_punctuation_position)
+aegisub.register_macro(": أدوات :/09 - تصحيح موضع علامات الترقيم", "تصحيح موضع علامات الترقيم :", fix_punctuation_unicode)
+aegisub.register_macro(": أدوات :/08 - عكس موضع علامات الترقيم", "عكس موضع علامات الترقيم :", fix_punctuation)
+aegisub.register_macro(": أدوات :/07 - أداة فحص الأخطاء", "أداة فحص الأخطاء :", spellchecker)
+aegisub.register_macro(": أدوات :/06 - تغيير شكل الكلمات العربية", "تغيير شكل الكلمات العربية :", add_ar_reshape_to_words)
+aegisub.register_macro(": أدوات :/05 - ترجمة متعددة", "ترجمة متعددة :", translate_with_external_script)
+aegisub.register_macro(": أدوات :/04 - المُشكل", "المُشكل :", correct_words)
+aegisub.register_macro(": أدوات :/03 - نسخ ولصق الوسوم", "نسخ ولصق الوسوم :", copy_paste_tags)
 aegisub.register_macro(": أدوات :/02 - استخراج وسوم الأنماط", "استخراج وسوم الأنماط :", extract_tags)
 aegisub.register_macro(": أدوات :/01 - تعديل النصوص", "تعديل النصوص :", edit_selected_text)
