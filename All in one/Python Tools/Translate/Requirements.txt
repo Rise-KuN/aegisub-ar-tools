@@ -1,8 +1,0 @@
-requests
-python-dotenv
-transformers
-torch
-torchvision
-torchaudio
-sacremoses
-sentencepiece
