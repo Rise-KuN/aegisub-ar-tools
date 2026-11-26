@@ -1,11 +1,7 @@
 # All in one Tools
 
-- Text Editor - Edit the selected lines, also support `RLT` if you hit (right ctrl + right shift).
 - Extract Tags - Extracts style properties from selected lines and injects them as override tags directly into the line.
-- Mochakel - Add Tachkeel To the selected lines `Arabic only`.
-- Translate - Translate From `eng, jp` to `ar, eng`.
 - Reshape AR Text - Reshape the text to make it support gardient characters.
-- AR Spell Check - spellcheck the selected lines `Arabic only`.
 - Fix Punctuation Unicode - Adds `U+202B` unicode character to start of all selected lines to fix the `RTL` problem in Aegisub.
 - Fix Punctuation V2 - Reverse the punctuation position to the end of the line In `RTL`.
 - Punctuation Position Normalizer - Normalizes punctuation placement from line start to line end.
@@ -18,12 +14,9 @@
 - Remove Text Between `Characters` or `Words`.
 - Add Blur - Add blur to selected lines based on `start` and `end` values with calculation.
 - Shift Times - Shift time of selected lines based on `first line time` then shift forward based on the `video player current time` with Shift Times Option.
-- Edit Times - Edit the selected lines timing by `Increase` or `Decrease` the `start` or `end` times based on the `input` values.
-- Calculate Progress - Based on the number of `current line, all lines`.
-- Voxify - An Aegisub macro that integrates with Voxify Discord bot for automated audio transcription.
 
 > [!NOTE]
-> Some tools `Mochakel`, `JPTL`, `Reshape AR Text`, `AR Spell Check`, `Voxify`, Require Python 3.9 or above.
+> Some tools `Reshape AR Text`, Require Python 3.9 or above.
 
 ## Requirements
 
@@ -39,5 +32,5 @@ Or Do It Manual via command prompt `cmd`:
 
 Press `Win + R`, Then type `cmd`, And hit Enter
 ```
-pip install requests python-dotenv transformers torch torchvision torchaudio sacremoses sentencepiece arabic-reshaper python-bidi pyspellchecker
+pip install arabic-reshaper python-bidi
 ```
